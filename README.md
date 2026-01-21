@@ -34,3 +34,25 @@
 | 13 | **Фисенко Анна Андреевна** | [Fisai](https://github.com/Fisai/PKOvchinikova_21IS_4semestr_FisenkoAA) |
 | 14 | **Шабанов Даниил Алексеевич** | [fertak08](https://github.com/fertak08/PKOvchinnikova_21IS_4semestr_Shabanov) |
 | 15 | **Юхин Лавр Юрьевич** | [PananiXX](https://github.com/PananiXX/П.К.Овчинникова_21ИС_4семестр_Юхин) |
+
+## 📁 Структура проекта
+
+```
+📦 Репозиторий учебной практики
+├── 📁 Документация/                    # Основная документация проекта
+│   ├── 📄 Бизнес требования.md         # Business Requirements Document
+│   ├── 📄 Архитектурная документация.md # Architectural Documentation
+│   ├── 📄 Техническое задание.md       # Technical Specification
+│   ├── 📄 Пользовательские истории.md  # User Stories
+│   ├── 📄 План тестирования.md         # Test Plan
+│   ├── 📄 Руководство пользователя.md  # User Manual
+│   ├── 📄 use case.md                  # Use Case Documentation
+│   ├── 📄 Системный анализ.md          # System Analysis
+│   └── 📄 Глоссарий.md                 # Glossary of Terms
+│
+├── 📁 Доп. Файлы/                      # Дополнительные файлы
+│   ├── 📄 Конспект.md                  # Конспект по алгоритму оценки
+│   └── 📄 Оценка.puml                  # Диаграмма алгоритма выставления оценки
+│
+├── 📄 README.md                        # Этот файл (главная навигация)
+└── 📄 План УП.01.md                    # План учебной практики
