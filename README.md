@@ -636,11 +636,26 @@ EduGrader - Система автоматизации оценивания уч�
 ## 📁 Структура исходного кода проекта
 
 ```
-
+EduGrader-NoJS/
+├── backend/
+│   ├── main.py              # Основной файл приложения
+│   ├── requirements.txt     # Зависимости Python
+│   ├── static/
+│   │   ├── style.css       # Стили
+│   │   └── uploads/        # Загруженные файлы
+│   └── templates/          # HTML шаблоны
+├── database/
+│   └── init.sql           # SQL скрипты
+├── docs/                  # Документация
+├── tests/                 # Тесты
+├── .gitignore
+└── README.md
 ```
+
 ---
 
 ## ✅ Соответствие заданию
+
 
 ---
 
