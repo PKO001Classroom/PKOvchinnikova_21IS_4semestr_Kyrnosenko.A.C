@@ -1,3 +1,4 @@
+```
 @startuml
 start
 :Начало оценки ответа;
@@ -49,6 +50,7 @@ else (нет)
   stop
 endif
 @enduml
+```
 
 ### Диаграмма
 
