@@ -1,0 +1,373 @@
+# Второй файл - Аналитический журнал знаний
+
+```python
+# database
+## Здесь содержатся данные программы
+import psycopg2
+from psycopg2 import Error
+import os
+from datetime import datetime
+from pathlib import Path
+
+
+class Database:
+    def __init__(self):
+        self.connection = None
+        self.cursor = None
+        self.connect()
+
+    def connect(self):
+        """Подключение к базе данных PostgreSQL"""
+        try:
+            self.connection = psycopg2.connect(
+                host="localhost",
+                database="knowledge_journal",
+                user="postgres",  # замените на вашего пользователя
+                password="1111",  # замените на ваш пароль
+                port="5432"
+            )
+            self.cursor = self.connection.cursor()
+            print("✅ Подключение к PostgreSQL установлено")
+            return True
+        except Error as e:
+            print(f"❌ Ошибка подключения к PostgreSQL: {e}")
+            return False
+
+    def initialize_database(self):
+        """Инициализация базы данных (создание таблиц если их нет)"""
+        try:
+            # Создание таблицы notes
+            self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS notes (
+                    id SERIAL PRIMARY KEY,
+                    title VARCHAR(255) NOT NULL,
+                    file_path VARCHAR(500) UNIQUE NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    category VARCHAR(100)
+                )
+            """)
+
+            # Создание таблицы tags
+            self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS tags (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(100) UNIQUE NOT NULL
+                )
+            """)
+
+            # Создание таблицы note_tags
+            self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS note_tags (
+                    note_id INT REFERENCES notes(id) ON DELETE CASCADE,
+                    tag_id INT REFERENCES tags(id) ON DELETE CASCADE,
+                    PRIMARY KEY (note_id, tag_id)
+                )
+            """)
+
+            # Создание таблицы activity_log
+            self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS activity_log (
+                    id SERIAL PRIMARY KEY,
+                    note_id INT REFERENCES notes(id) ON DELETE CASCADE,
+                    event_type VARCHAR(20) CHECK (event_type IN ('CREATE', 'UPDATE', 'VIEW')),
+                    event_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+
+            self.connection.commit()
+            print("✅ Таблицы базы данных инициализированы")
+            return True
+
+        except Error as e:
+            print(f"❌ Ошибка инициализации БД: {e}")
+            return False
+
+    def close(self):
+        """Закрытие соединения с БД"""
+        if self.cursor:
+            self.cursor.close()
+        if self.connection:
+            self.connection.close()
+            print("🔌 Соединение с БД закрыто")
+
+
+if __name__ == "__main__":
+    # Тестирование подключения
+    db = Database()
+    if db.connection:
+        print("✅ База данных доступна")
+        db.initialize_database()
+        db.close()
+    else:
+        print("❌ Не удалось подключиться к БД")
+
+---
+# Работа с Markdown файлами
+## file_manager
+import psycopg2
+from psycopg2 import Error
+import os
+from datetime import datetime
+from pathlib import Path
+
+
+class Database:
+    def __init__(self):
+        self.connection = None
+        self.cursor = None
+        self.connect()
+
+    def connect(self):
+        """Подключение к базе данных PostgreSQL"""
+        try:
+            self.connection = psycopg2.connect(
+                host="localhost",
+                database="knowledge_journal",
+                user="postgres",  # замените на вашего пользователя
+                password="1111",  # замените на ваш пароль
+                port="5432"
+            )
+            self.cursor = self.connection.cursor()
+            print("✅ Подключение к PostgreSQL установлено")
+            return True
+        except Error as e:
+            print(f"❌ Ошибка подключения к PostgreSQL: {e}")
+            return False
+
+    def initialize_database(self):
+        """Инициализация базы данных (создание таблиц если их нет)"""
+        try:
+            # Создание таблицы notes
+            self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS notes (
+                    id SERIAL PRIMARY KEY,
+                    title VARCHAR(255) NOT NULL,
+                    file_path VARCHAR(500) UNIQUE NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    category VARCHAR(100)
+                )
+            """)
+
+            # Создание таблицы tags
+            self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS tags (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(100) UNIQUE NOT NULL
+                )
+            """)
+
+            # Создание таблицы note_tags
+            self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS note_tags (
+                    note_id INT REFERENCES notes(id) ON DELETE CASCADE,
+                    tag_id INT REFERENCES tags(id) ON DELETE CASCADE,
+                    PRIMARY KEY (note_id, tag_id)
+                )
+            """)
+
+            # Создание таблицы activity_log
+            self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS activity_log (
+                    id SERIAL PRIMARY KEY,
+                    note_id INT REFERENCES notes(id) ON DELETE CASCADE,
+                    event_type VARCHAR(20) CHECK (event_type IN ('CREATE', 'UPDATE', 'VIEW')),
+                    event_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+
+            self.connection.commit()
+            print("✅ Таблицы базы данных инициализированы")
+            return True
+
+        except Error as e:
+            print(f"❌ Ошибка инициализации БД: {e}")
+            return False
+
+    def close(self):
+        """Закрытие соединения с БД"""
+        if self.cursor:
+            self.cursor.close()
+        if self.connection:
+            self.connection.close()
+            print("🔌 Соединение с БД закрыто")
+
+
+if __name__ == "__main__":
+    # Тестирование подключения
+    db = Database()
+    if db.connection:
+        print("✅ База данных доступна")
+        db.initialize_database()
+        db.close()
+    else:
+        print("❌ Не удалось подключиться к БД")
+
+---
+# gui
+## Интерфейс Tkinter
+import tkinter as tk
+from tkinter import ttk, scrolledtext
+
+
+class KnowledgeJournalApp:
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Аналитический журнал знаний")
+        self.root.geometry("1200x800")
+
+        # 1. Панель управления (Frame)
+        self.create_control_panel()
+
+        # 2. Список конспектов (Treeview)
+        self.create_notes_list()
+
+        # 3. Область редактирования (ScrolledText)
+        self.create_editor_panel()
+
+        # 4. Панель тегов (Frame с Label и Entry)
+        self.create_tags_panel()
+
+        # 5. Вкладка аналитики (Notebook)
+        self.create_analytics_tab()
+
+---
+
+# analytics
+## Аналитика и сбор статистики
+class Analytics:
+    def get_category_stats(self):
+        """Количество конспектов по категориям"""
+        query = """
+        SELECT category, COUNT(*) as count 
+        FROM notes 
+        GROUP BY category 
+        ORDER BY count DESC
+        """
+
+    def get_recent_activity(self, days=7):
+        """Активность за последние N дней"""
+        query = """
+        SELECT DATE(event_time) as date, 
+               COUNT(*) as activities
+        FROM activity_log 
+        WHERE event_time >= CURRENT_DATE - INTERVAL '%s days'
+        GROUP BY DATE(event_time)
+        ORDER BY date
+        """
+
+    def get_top_tags(self, limit=5):
+        """Самые популярные теги"""
+        query = """
+        SELECT t.name, COUNT(nt.note_id) as usage_count
+        FROM tags t
+        JOIN note_tags nt ON t.id = nt.tag_id
+        GROUP BY t.id
+        ORDER BY usage_count DESC
+        LIMIT %s
+        """
+
+---
+# excel_exporter
+## Экспорт в Excel
+from openpyxl import Workbook
+from openpyxl.chart import BarChart, Reference
+import os
+
+
+class ExcelExporter:
+    def export_report(self, data, filename="exports/report.xlsx"):
+        """Создание Excel файла с двумя листами"""
+
+        # 1. Создаём рабочую книгу
+        wb = Workbook()
+
+        # 2. Лист "Данные" - таблица со статистикой
+        ws_data = wb.active
+        ws_data.title = "Данные"
+
+        # 3. Добавляем данные
+        for row in data['category_stats']:
+            ws_data.append([row['category'], row['count']])
+
+        # 4. Лист "Графики" - диаграммы
+        ws_chart = wb.create_sheet("Графики")
+
+        # 5. Создаём столбчатую диаграмму
+        chart = BarChart()
+        chart.title = "Конспекты по категориям"
+        chart.x_axis.title = "Категории"
+        chart.y_axis.title = "Количество"
+
+        # 6. Добавляем данные в диаграмму
+        data_ref = Reference(ws_data, min_col=2, min_row=1, max_row=len(data['category_stats']))
+        cats_ref = Reference(ws_data, min_col=1, min_row=2, max_row=len(data['category_stats']))
+
+        chart.add_data(data_ref, titles_from_data=True)
+        chart.set_categories(cats_ref)
+
+        # 7. Добавляем диаграмму на лист
+        ws_chart.add_chart(chart, "A1")
+
+        # 8. Сохраняем файл
+        os.makedirs("exports", exist_ok=True)
+        wb.save(filename)
+
+---
+# pdf_exporter
+## Генерация PDF отчётов
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Image
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import colors
+import matplotlib.pyplot as plt
+
+
+class PDFExporter:
+    def export_pdf(self, data, filename="exports/report.pdf"):
+        """Генерация PDF отчёта"""
+
+        # 1. Создаём PDF документ
+        doc = SimpleDocTemplate(filename, pagesize=A4)
+        story = []
+
+        # 2. Заголовок
+        styles = getSampleStyleSheet()
+        title = Paragraph("Аналитический отчёт по конспектам", styles['Title'])
+        story.append(title)
+
+        # 3. Таблица с метриками
+        metrics_data = [
+            ["Метрика", "Значение"],
+            ["Всего конспектов", data['total_notes']],
+            ["Категорий", len(data['category_stats'])],
+            ["Тегов", data['total_tags']],
+            ["Активность за 7 дней", data['activity_7_days']]
+        ]
+
+        table = Table(metrics_data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        story.append(table)
+
+        # 4. Создаём график с matplotlib
+        fig = self.create_chart(data)
+        chart_path = "exports/chart_temp.png"
+        fig.savefig(chart_path)
+
+        # 5. Добавляем график в PDF
+        chart_img = Image(chart_path, width=400, height=300)
+        story.append(chart_img)
+
+        # 6. Список последних конспектов
+        recent_title = Paragraph("Последние конспекты:", styles['Heading2'])
+        story.append(recent_title)
+
+        # 7. Генерируем PDF
+        doc.build(story)
+```
