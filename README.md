@@ -638,50 +638,55 @@ EduGrader - Система автоматизации оценивания уч�
 
 ```
 EduGrader/
-├── backend/
+├── backend/                 # Бэкенд на FastAPI (Python)
 │   ├── app/
-│   │   ├── api/
-│   │   │   ├── endpoints/
-│   │   │   │   ├── auth.py
-│   │   │   │   ├── users.py
-│   │   │   │   ├── courses.py
-│   │   │   │   ├── assignments.py
-│   │   │   │   ├── submissions.py
-│   │   │   │   └── grades.py
-│   │   │   └── deps.py
-│   │   ├── core/
-│   │   │   ├── config.py
-│   │   │   ├── security.py
-│   │   │   └── database.py
-│   │   ├── models/
-│   │   │   ├── user.py
-│   │   │   ├── course.py
-│   │   │   ├── assignment.py
-│   │   │   └── submission.py
-│   │   ├── schemas/
-│   │   │   ├── user.py
-│   │   │   ├── course.py
-│   │   │   └── assignment.py
-│   │   └── main.py
+│   │   ├── api/              # REST API для мобильных приложений
+│   │   ├── core/             # Ядро системы
+│   │   ├── models/            # Модели данных
+│   │   └── main.py            # Точка входа
 │   ├── requirements.txt
-│   ├── .env
 │   └── Dockerfile
-├── frontend/
-│   ├── public/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── auth/
-│   │   │   ├── courses/
-│   │   │   ├── assignments/
-│   │   │   └── common/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   ├── store/
-│   │   ├── utils/
-│   │   ├── App.js
-│   │   └── index.js
-│   ├── package.json
-│   └── Dockerfile
+│
+├── frontend/                # Фронтенд на HTML/CSS 
+│   ├── static/
+│   │   ├── css/
+│   │   │   ├── style.css
+│   │   │   ├── auth.css
+│   │   │   ├── dashboard.css
+│   │   │   ├── courses.css
+│   │   │   └── responsive.css
+│   │   └── images/
+│   │       └── logo.svg
+│   │
+│   └── templates/           # HTML шаблоны (Jinja2)
+│       ├── base.html
+│       ├── index.html
+│       ├── auth/
+│       │   ├── login.html
+│       │   ├── register.html
+│       │   └── forgot_password.html
+│       ├── dashboard/
+│       │   └── dashboard.html
+│       ├── courses/
+│       │   ├── courses.html
+│       │   ├── course_detail.html
+│       │   ├── course_create.html
+│       │   └── course_edit.html
+│       ├── assignments/
+│       │   ├── assignments.html
+│       │   ├── assignment_detail.html
+│       │   ├── assignment_create.html
+│       │   └── assignment_submit.html
+│       ├── submissions/
+│       │   ├── submissions.html
+│       │   └── submission_review.html
+│       ├── grades/
+│       │   └── grades.html
+│       ├── profile/
+│       │   └── profile.html
+│       └── admin/
+│           └── admin_panel.html
+│
 ├── docker-compose.yml
 └── README.md
 ```
