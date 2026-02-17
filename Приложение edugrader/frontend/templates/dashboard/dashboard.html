@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}Дашборд{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/dashboard.css">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Добро пожаловать, {{ user.full_name.split()[0] }}!</h1>
+    <p class="date">{{ now.strftime('%d %B %Y') }}</p>
+</div>
+
+<!-- Статистика -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">📚</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ total_courses }}</div>
+            <div class="stat-label">Активных курсов</div>
+        </div>
+    </div>
+    
+    {% if user.role == 'student' %}
+    <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ pending_assignments }}</div>
+            <div class="stat-label">Заданий на проверку</div>
+        </div>
+    </div>
+    {% elif user.role == 'teacher' %}
+    <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ pending_reviews }}</div>
+            <div class="stat-label">Ожидают проверки</div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if user.role == 'student' %}
+    <div class="stat-card">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ recent_grades|length }}</div>
+            <div class="stat-label">Новых оценок</div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="stat-card">
+        <div class="stat-icon">⏰</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ deadlines|length if deadlines else 0 }}</div>
+            <div class="stat-label">Ближайших дедлайнов</div>
+        </div>
+    </div>
+</div>
+
+<!-- Сетка дашборда -->
+<div class="dashboard-grid">
+    <!-- Мои курсы -->
+    <div class="dashboard-card">
+        <h3>Мои курсы</h3>
+        
+        {% if courses %}
+        <div class="courses-list">
+            {% for course in courses %}
+            <div class="course-item">
+                <a href="/courses/{{ course.id }}" class="course-link">
+                    <h4>{{ course.name }}</h4>
+                    <p class="course-meta">{{ course.code }} • {{ course.teacher.full_name }}</p>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        <a href="/courses" class="card-link">Все курсы →</a>
+        {% else %}
+        <p class="empty-message">У вас пока нет курсов</p>
+        {% if user.role == 'student' %}
+        <a href="/courses" class="btn btn-secondary">Найти курсы</a>
+        {% elif user.role == 'teacher' %}
+        <a href="/courses/create" class="btn btn-primary">Создать курс</a>
+        {% endif %}
+        {% endif %}
+    </div>
+    
+    {% if user.role == 'student' %}
+    <!-- Ближайшие дедлайны -->
+    <div class="dashboard-card">
+        <h3>Ближайшие дедлайны</h3>
+        
+        {% if deadlines %}
+        <div class="deadlines-list">
+            {% for assignment in deadlines %}
+            {% set days_left = (assignment.due_date - now).days %}
+            <div class="deadline-item 
+                {% if days_left <= 2 %}urgent
+                {% elif days_left <= 5 %}warning
+                {% else %}normal{% endif %}">
+                <a href="/assignments/{{ assignment.id }}" class="deadline-link">
+                    <h4>{{ assignment.title }}</h4>
+                    <p class="deadline-course">{{ assignment.course.name }}</p>
+                    <div class="deadline-date">
+                        <span class="days-left">{{ days_left }} дн.</span>
+                        <small>{{ assignment.due_date.strftime('%d.%m.%Y') }}</small>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty-message">Нет ближайших дедлайнов</p>
+        {% endif %}
+    </div>
+    
+    <!-- Последние оценки -->
+    <div class="dashboard-card">
+        <h3>Последние оценки</h3>
+        
+        {% if recent_grades %}
+        <div class="grades-list">
+            {% for grade in recent_grades %}
+            {% set percentage = (grade.total_score / grade.max_score * 100)|int %}
+            <div class="grade-item">
+                <a href="/submissions/{{ grade.submission_id }}" class="grade-link">
+                    <h4>{{ grade.assignment.title }}</h4>
+                    <p class="grade-course">{{ grade.assignment.course.name }}</p>
+                    <div class="grade-value 
+                        {% if percentage >= 90 %}grade-a
+                        {% elif percentage >= 75 %}grade-b
+                        {% elif percentage >= 60 %}grade-c
+                        {% else %}grade-f{% endif %}">
+                        {{ grade.total_score }}/{{ grade.max_score }}
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        <a href="/grades" class="card-link">Все оценки →</a>
+        {% else %}
+        <p class="empty-message">Пока нет оценок</p>
+        {% endif %}
+    </div>
+    
+    {% elif user.role == 'teacher' %}
+    <!-- Работы на проверку -->
+    <div class="dashboard-card">
+        <h3>Ожидают проверки</h3>
+        
+        <div class="pending-list">
+            <p>У вас {{ pending_reviews }} работ на проверке</p>
+            <a href="/submissions?status=submitted" class="btn btn-primary">
+                Перейти к проверке
+            </a>
+        </div>
+    </div>
+    
+    <!-- Быстрые действия -->
+    <div class="dashboard-card">
+        <h3>Быстрые действия</h3>
+        
+        <div class="quick-actions">
+            <a href="/courses/create" class="action-btn">➕ Создать курс</a>
+            <a href="/submissions?status=submitted" class="action-btn">📝 Проверить работы</a>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if user.role == 'admin' %}
+    <!-- Админ-панель -->
+    <div class="dashboard-card">
+        <h3>Управление системой</h3>
+        
+        <div class="admin-stats">
+            <p>👥 Пользователей: {{ total_users }}</p>
+            <p>📚 Курсов: {{ total_courses }}</p>
+            <p>📝 Заданий: {{ total_assignments }}</p>
+        </div>
+        
+        <div class="admin-actions">
+            <a href="/admin/users" class="action-btn">👥 Управление пользователями</a>
+            <a href="/admin/import-users" class="action-btn">📥 Импорт из CSV</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

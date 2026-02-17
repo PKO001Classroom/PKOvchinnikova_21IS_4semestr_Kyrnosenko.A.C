@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/auth.css">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>Регистрация в EduGrader</h2>
+        
+        <form method="POST" action="/register">
+            <div class="form-group">
+                <label for="full_name">Полное имя *</label>
+                <input type="text" id="full_name" name="full_name" required 
+                       placeholder="Иванов Иван Иванович">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" name="email" required 
+                       placeholder="ivanov@edu.ru">
+            </div>
+            
+            <div class="form-group">
+                <label for="role">Роль *</label>
+                <select id="role" name="role" required>
+                    <option value="">Выберите роль</option>
+                    <option value="student">Студент</option>
+                    <option value="teacher">Преподаватель</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="group">Группа (для студентов)</label>
+                <input type="text" id="group" name="group" placeholder="Например: 21ИС-24">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Пароль *</label>
+                <input type="password" id="password" name="password" required>
+                <small class="hint">Минимум 8 символов, буквы и цифры</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm_password">Подтверждение пароля *</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">
+                Зарегистрироваться
+            </button>
+        </form>
+        
+        <div class="auth-links">
+            <a href="/login">Уже есть аккаунт? Войти</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

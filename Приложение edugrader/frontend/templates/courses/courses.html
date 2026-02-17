@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Курсы{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/courses.css">
+{% endblock %}
+
+{% block content %}
+<div class="courses-header">
+    <h1>Мои курсы</h1>
+    
+    {% if user.role in ['teacher', 'admin'] %}
+    <a href="/courses/create" class="btn btn-primary">Создать курс</a>
+    {% endif %}
+</div>
+
+<!-- Поиск и фильтры -->
+<div class="courses-filters">
+    <form method="GET" action="/courses" class="search-form">
+        <input 
+            type="text" 
+            name="search" 
+            placeholder="Поиск курсов..." 
+            value="{{ search }}"
+            class="search-input"
+        >
+        <button type="submit" class="btn btn-primary">Найти</button>
+        {% if search %}
+        <a href="/courses" class="btn btn-secondary">Сбросить</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Сетка курсов -->
+{% if courses %}
+<div class="courses-grid">
+    {% for course in courses %}
+    <div class="course-card">
+        <div class="course-header">
+            <span class="course-code">{{ course.code }}</span>
+            <span class="course-status status-{{ course.status.value }}">
+                {{ course.status.value }}
+            </span>
+        </div>
+        
+        <h3>{{ course.name }}</h3>
+        
+        <p class="course-description">
+            {{ course.description[:100] if course.description else 'Нет описания' }}
+            {% if course.description and course.description|length > 100 %}...{% endif %}
+        </p>
+        
+        <div class="course-meta">
+            <span>📚 {{ course.assignments|length }} заданий</span>
+            <span>👥 {{ course.students|length }}/{{ course.max_students }}</span>
+        </div>
+        
+        <p class="course-teacher">Преподаватель: {{ course.teacher.full_name }}</p>
+        
+        <div class="course-actions">
+            <a href="/courses/{{ course.id }}" class="btn btn-primary">Подробнее</a>
+            
+            {% if user.role == 'teacher' and course.teacher_id == user.id %}
+            <a href="/courses/{{ course.id }}/edit" class="btn btn-secondary">Редактировать</a>
+            {% endif %}
+            
+            {% if user.role == 'student' and user not in course.students and course.students|length < course.max_students %}
+            <form method="POST" action="/courses/{{ course.id }}/enroll" style="display: inline;">
+                <button type="submit" class="btn btn-success">Записаться</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Пагинация -->
+{% if total_pages > 1 %}
+<div class="pagination">
+    {% if page > 1 %}
+    <a href="/courses?page={{ page-1 }}{% if search %}&search={{ search }}{% endif %}" class="page-link">
+        ←
+    </a>
+    {% endif %}
+    
+    {% for p in range(1, total_pages + 1) %}
+        {% if p == page %}
+        <span class="page-current">{{ p }}</span>
+        {% else %}
+        <a href="/courses?page={{ p }}{% if search %}&search={{ search }}{% endif %}" class="page-link">
+            {{ p }}
+        </a>
+        {% endif %}
+    {% endfor %}
+    
+    {% if page < total_pages %}
+    <a href="/courses?page={{ page+1 }}{% if search %}&search={{ search }}{% endif %}" class="page-link">
+        →
+    </a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+    <p>У вас пока нет курсов</p>
+    
+    {% if user.role == 'student' %}
+    <p>Вы можете найти курсы в каталоге</p>
+    <a href="/courses" class="btn btn-primary">Обновить список</a>
+    {% elif user.role == 'teacher' %}
+    <p>Создайте свой первый курс</p>
+    <a href="/courses/create" class="btn btn-primary">Создать курс</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

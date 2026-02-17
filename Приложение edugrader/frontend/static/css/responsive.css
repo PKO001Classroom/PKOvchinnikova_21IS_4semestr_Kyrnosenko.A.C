@@ -1,0 +1,267 @@
+/* Адаптивность для всех устройств */
+
+/* Планшеты (768px - 1024px) */
+@media (max-width: 1024px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .courses-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Мобильные устройства (до 768px) */
+@media (max-width: 768px) {
+    /* Навигация */
+    .nav-menu {
+        display: none;
+        position: absolute;
+        top: 70px;
+        left: 0;
+        right: 0;
+        background: white;
+        flex-direction: column;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        z-index: 1000;
+    }
+    
+    .nav-menu.show {
+        display: flex;
+    }
+    
+    .nav-menu .nav-link {
+        padding: 15px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .nav-menu .nav-link:last-child {
+        border-bottom: none;
+    }
+    
+    .mobile-menu-btn {
+        display: block;
+    }
+    
+    /* Сетки */
+    .stats-grid,
+    .courses-grid,
+    .features-grid,
+    .admin-stats-grid,
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Карточки */
+    .course-card,
+    .feature-card,
+    .stat-card,
+    .action-card {
+        margin-bottom: 15px;
+    }
+    
+    /* Таблицы */
+    .admin-table,
+    .students-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    /* Формы */
+    .form-container {
+        margin: 15px;
+        padding: 20px;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions button,
+    .form-actions a {
+        width: 100%;
+        text-align: center;
+    }
+    
+    /* Профиль */
+    .profile-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .profile-header {
+        padding: 20px;
+    }
+    
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+        font-size: 36px;
+    }
+    
+    /* Админ-панель */
+    .admin-container {
+        padding: 15px;
+    }
+    
+    .admin-stats-grid .stat-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    /* Детали курса */
+    .course-detail-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .course-title {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .assignment-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .assignment-status {
+        width: 100%;
+    }
+    
+    .assignment-status .btn {
+        width: 100%;
+        text-align: center;
+    }
+    
+    /* Проверка работ */
+    .review-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .review-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .review-grade-panel {
+        position: static;
+    }
+    
+    .work-meta {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    /* Пагинация */
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    /* Герой-секция */
+    .hero-section {
+        padding: 40px 20px;
+    }
+    
+    .hero-section h1 {
+        font-size: 32px;
+    }
+    
+    .hero-subtitle {
+        font-size: 18px;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .hero-buttons .btn {
+        width: 100%;
+    }
+    
+    /* Статистика на главной */
+    .stats-section {
+        flex-direction: column;
+        gap: 20px;
+        padding: 30px 20px;
+    }
+    
+    .stat-item {
+        width: 100%;
+    }
+}
+
+/* Очень маленькие устройства (до 480px) */
+@media (max-width: 480px) {
+    .nav-container {
+        padding: 0 10px;
+    }
+    
+    .logo span {
+        display: none;
+    }
+    
+    .course-meta {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .deadline-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .deadline-date {
+        width: 100%;
+        text-align: left;
+    }
+    
+    .grade-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .grade-value {
+        align-self: flex-start;
+    }
+    
+    .auth-card {
+        padding: 20px 15px;
+    }
+    
+    .demo-accounts .demo-buttons {
+        flex-direction: column;
+    }
+    
+    .demo-accounts .demo-buttons span {
+        width: 100%;
+    }
+}

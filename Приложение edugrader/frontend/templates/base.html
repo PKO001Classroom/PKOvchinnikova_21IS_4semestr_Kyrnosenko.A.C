@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduGrader - {% block title %}Система оценивания{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Навигационная панель -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <img src="/static/images/logo.svg" alt="EduGrader" width="40" height="40">
+                <span>EduGrader</span>
+            </a>
+            
+            {% if user %}
+            <div class="nav-menu">
+                <a href="/dashboard" class="nav-link {% if request.url.path == '/dashboard' %}active{% endif %}">
+                    Главная
+                </a>
+                <a href="/courses" class="nav-link {% if request.url.path.startswith('/courses') %}active{% endif %}">
+                    Курсы
+                </a>
+                <a href="/submissions" class="nav-link {% if request.url.path.startswith('/submissions') %}active{% endif %}">
+                    Работы
+                </a>
+                <a href="/grades" class="nav-link {% if request.url.path == '/grades' %}active{% endif %}">
+                    Оценки
+                </a>
+                {% if user.role == 'admin' %}
+                <a href="/admin" class="nav-link {% if request.url.path.startswith('/admin') %}active{% endif %}">
+                    Админ
+                </a>
+                {% endif %}
+            </div>
+            
+            <div class="nav-auth">
+                <a href="/profile" class="nav-link user-name">
+                    {{ user.full_name.split()[0] }}
+                </a>
+                <a href="/logout" class="btn-logout">Выйти</a>
+            </div>
+            {% else %}
+            <div class="nav-auth">
+                <a href="/login" class="nav-link">Вход</a>
+                <a href="/register" class="btn btn-primary">Регистрация</a>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <main class="container">
+        {% if error %}
+        <div class="alert alert-error">
+            {{ error }}
+        </div>
+        {% endif %}
+        
+        {% if success %}
+        <div class="alert alert-success">
+            {{ success }}
+        </div>
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 EduGrader. Учебный проект группы 21ИС-24</p>
+            <p>Руководитель: Бобошко Михаил Николаевич</p>
+        </div>
+    </footer>
+</body>
+</html>

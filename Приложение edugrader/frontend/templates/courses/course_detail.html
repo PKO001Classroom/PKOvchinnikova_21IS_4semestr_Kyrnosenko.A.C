@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/courses.css">
+{% endblock %}
+
+{% block content %}
+<div class="course-detail-header">
+    <div class="course-title">
+        <h1>{{ course.name }}</h1>
+        <span class="course-code">{{ course.code }}</span>
+    </div>
+    
+    <div class="course-status-info">
+        <span class="status-badge status-{{ course.status.value }}">
+            {{ course.status.value }}
+        </span>
+        
+        {% if user.role == 'teacher' and course.teacher_id == user.id %}
+        <a href="/courses/{{ course.id }}/edit" class="btn btn-secondary">
+            Редактировать
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="course-content">
+    <!-- Основная информация -->
+    <div class="course-info-card">
+        <h2>О курсе</h2>
+        
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Преподаватель</span>
+                <span class="info-value">{{ course.teacher.full_name }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Кредитов</span>
+                <span class="info-value">{{ course.credits }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Студентов</span>
+                <span class="info-value">{{ course.students|length }}/{{ course.max_students }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Заданий</span>
+                <span class="info-value">{{ assignments|length }}</span>
+            </div>
+        </div>
+        
+        {% if course.description %}
+        <div class="course-description">
+            <h3>Описание</h3>
+            <p>{{ course.description }}</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Задания -->
+    <div class="course-assignments">
+        <div class="section-header">
+            <h2>Задания</h2>
+            
+            {% if user.role == 'teacher' and course.teacher_id == user.id %}
+            <a href="/courses/{{ course.id }}/assignments/create" class="btn btn-primary">
+                Создать задание
+            </a>
+            {% endif %}
+        </div>
+        
+        {% if assignments %}
+        <div class="assignments-list">
+            {% for assignment in assignments %}
+            <div class="assignment-item">
+                <div class="assignment-info">
+                    <h3>
+                        <a href="/assignments/{{ assignment.id }}">
+                            {{ assignment.title }}
+                        </a>
+                    </h3>
+                    
+                    <div class="assignment-meta">
+                        <span class="assignment-type">{{ assignment.type.value }}</span>
+                        <span class="assignment-score">Макс. {{ assignment.max_score }} баллов</span>
+                        
+                        {% if assignment.due_date %}
+                        <span class="assignment-due 
+                            {% if assignment.due_date < now %}overdue{% endif %}">
+                            {% if assignment.due_date < now %}
+                                Просрочено: {{ assignment.due_date.strftime('%d.%m.%Y') }}
+                            {% else %}
+                                Дедлайн: {{ assignment.due_date.strftime('%d.%m.%Y') }}
+                            {% endif %}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if user.role == 'student' %}
+                    {% set submission = assignment.submissions|selectattr('student_id', 'equalto', user.id)|first %}
+                    <div class="assignment-status">
+                        {% if submission %}
+                            <span class="status-{{ submission.status.value }}">
+                                {{ submission.status.value }}
+                            </span>
+                            {% if submission.grade %}
+                            <span class="grade-badge">
+                                {{ submission.grade.total_score }}/{{ assignment.max_score }}
+                            </span>
+                            {% endif %}
+                        {% else %}
+                            <a href="/assignments/{{ assignment.id }}/submit" class="btn btn-success">
+                                Сдать работу
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty-message">В этом курсе пока нет заданий</p>
+        {% endif %}
+    </div>
+    
+    <!-- Студенты (для преподавателя) -->
+    {% if user.role == 'teacher' and course.teacher_id == user.id %}
+    <div class="course-students">
+        <h2>Студенты ({{ students|length }})</h2>
+        
+        {% if students %}
+        <table class="students-table">
+            <thead>
+                <tr>
+                    <th>ФИО</th>
+                    <th>Email</th>
+                    <th>Группа</th>
+                    <th>Прогресс</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.full_name }}</td>
+                    <td>{{ student.email }}</td>
+                    <td>{{ student.group or '-' }}</td>
+                    <td>
+                        {% set total = assignments|length %}
+                        {% set submitted = 0 %}
+                        {% for a in assignments %}
+                            {% if a.submissions|selectattr('student_id', 'equalto', student.id)|list %}
+                                {% set submitted = submitted + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ (submitted/total*100)|int if total > 0 else 0 }}%"></div>
+                        </div>
+                        <span class="progress-text">{{ submitted }}/{{ total }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="empty-message">На этот курс еще никто не записался</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

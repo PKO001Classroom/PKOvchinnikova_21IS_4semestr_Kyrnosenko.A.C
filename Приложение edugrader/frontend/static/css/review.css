@@ -1,0 +1,155 @@
+/* Стили для страницы проверки работ */
+.review-container {
+    padding: 30px 0;
+}
+
+.review-header {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.review-header h1 {
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.student-info h2 {
+    margin: 0 0 5px 0;
+    color: var(--text-primary);
+}
+
+.student-info p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.review-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 30px;
+}
+
+.review-work-panel {
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 25px;
+}
+
+.work-info {
+    margin-bottom: 25px;
+}
+
+.work-info h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.work-meta {
+    display: flex;
+    gap: 20px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.student-comments {
+    background: var(--bg-light);
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.student-comments h4 {
+    margin: 0 0 10px 0;
+    color: var(--text-primary);
+}
+
+.student-comments p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+.work-preview {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    min-height: 400px;
+    background: var(--bg-light);
+}
+
+.file-preview-placeholder {
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    color: var(--text-secondary);
+}
+
+.review-grade-panel {
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 25px;
+    height: fit-content;
+    position: sticky;
+    top: 90px;
+}
+
+.review-grade-panel h3 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--bg-light);
+}
+
+.grade-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.grade-form .form-group {
+    margin-bottom: 0;
+}
+
+.grade-form input[type="number"] {
+    font-size: 18px;
+    padding: 12px;
+}
+
+.grade-form textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+    .review-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .review-grade-panel {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .review-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .work-meta {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
