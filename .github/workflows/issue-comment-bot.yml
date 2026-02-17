@@ -5,30 +5,47 @@ on:
     types: [created]
 
 permissions:
-  issues: write
   contents: read
 
 jobs:
-  handle-comment:
+  dispatch-to-master:
+    if: ${{ github.event.issue.pull_request == null }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Placeholder bot action
+      - name: Send repository_dispatch to master repo
+        uses: actions/github-script@v7
         env:
-          COMMENT_BODY: ${{ github.event.comment.body }}
-          COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
-        run: |
-          python - <<'PY'
-          import os
-          print("Issue comment received")
-          print(f"author={os.getenv('COMMENT_AUTHOR')}")
-          print(f"body={os.getenv('COMMENT_BODY')}")
-          # TODO: replace placeholder with real bot logic
-          PY
+          MASTER_OWNER: ${{ vars.MASTER_OWNER }}
+          MASTER_REPO: ${{ vars.MASTER_REPO }}
+        with:
+          github-token: ${{ secrets.ORG_BOT_PAT }}
+          script: |
+            const owner = process.env.MASTER_OWNER || 'PKO001Classroom';
+            const repo = process.env.MASTER_REPO || 'EDUAI2026AgentMaster001';
+
+            const payload = {
+              action: context.payload.action,
+              repository: {
+                owner: { login: context.repo.owner },
+                name: context.repo.repo
+              },
+              issue: {
+                number: context.payload.issue?.number,
+                pull_request: context.payload.issue?.pull_request || null
+              },
+              comment: {
+                body: context.payload.comment?.body || '',
+                html_url: context.payload.comment?.html_url || '',
+                user: {
+                  login: context.payload.comment?.user?.login || '',
+                  type: context.payload.comment?.user?.type || ''
+                }
+              }
+            };
+
+            await github.request('POST /repos/{owner}/{repo}/dispatches', {
+              owner,
+              repo,
+              event_type: 'issue_comment_event',
+              client_payload: payload,
+            });
