@@ -27,7 +27,7 @@
 | 6 | **Поздняков Владимир Романович** | [Voviy-ux](https://github.com/Voviy-ux/PKOvchinnikova_21IS_PozdnyakovVR) |
 | 7 | **Поздняков Дмитрий Романович** | [Mitya1606](https://github.com/Mitya1606/PKOvchinnikova_21IS_4semestr_PozdnyakovD) |
 | 8 | **Полсачев Матвей Анатольевич** | [⏳В Процессе...⏳]() |
-| 9 | **Рукас Вероника Олеговна** | [⏳В Процессе...⏳]() |
+| 9 | **Рукас Вероника Олеговна** | [Burnshtein](https://github.com/Burnshtein/PKOvchinnikova_21IS_4semestr_RukasV) |
 | 10 | **Силаков Максим Андреевич** | [Grozard](https://github.com/Grozard/PKOvchinnikova_21IS_4semestr_Silakov) |
 | 11 | **Тараканова Андрей Андреевич** | [20.01.26](https://github.com/andreitar3/20.01.26) |
 | 12 | **Удин Дмитрий Максимович** | [prostoflytre](https://github.com/prostoflytre/modelup) |
