@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EduGrader Тест</title>
+    <style>
+        body { font-family: Arial; padding: 20px; max-width: 800px; margin: 0 auto; background: #f5f5f5; }
+        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        h2 { color: #666; margin-top: 30px; }
+        input, select, button { padding: 10px; margin: 5px; width: 100%; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; font-size: 16px; }
+        button:hover { background: #0056b3; }
+        pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow: auto; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; display: none; }
+        .success { background: #d4edda; color: #155724; display: block; }
+        .error { background: #f8d7da; color: #721c24; display: block; }
+        .token-info { background: #e2f3ff; padding: 10px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 EduGrader Тест API</h1>
+        <p>Бэкенд: http://localhost:8000/api</p>
+        
+        <div id="status" class="status"></div>
+        <div id="tokenInfo" class="token-info" style="display: none;"></div>
+
+        <h2>🔐 Регистрация</h2>
+        <input type="email" id="reg-email" placeholder="Email" value="test@example.com">
+        <input type="text" id="reg-username" placeholder="Username" value="testuser">
+        <input type="text" id="reg-fullname" placeholder="Полное имя" value="Тестовый Пользователь">
+        <input type="password" id="reg-password" placeholder="Пароль" value="password123">
+        <select id="reg-role">
+            <option value="student">Студент</option>
+            <option value="teacher">Преподаватель</option>
+        </select>
+        <button onclick="register()">Зарегистрироваться</button>
+
+        <h2>🔑 Вход</h2>
+        <input type="text" id="login-username" placeholder="Username" value="testuser">
+        <input type="password" id="login-password" placeholder="Пароль" value="password123">
+        <button onclick="login()">Войти</button>
+
+        <h2>📋 Мои курсы</h2>
+        <button onclick="getCourses()" id="coursesBtn" disabled>Получить курсы</button>
+
+        <h2>➕ Создать курс (только для преподавателя)</h2>
+        <input type="text" id="course-name" placeholder="Название курса" value="Python Programming">
+        <input type="text" id="course-code" placeholder="Код курса" value="PY101">
+        <input type="text" id="course-description" placeholder="Описание" value="Основы Python">
+        <input type="text" id="course-year" placeholder="Учебный год" value="2024">
+        <input type="number" id="course-semester" placeholder="Семестр" value="1">
+        <button onclick="createCourse()" id="createCourseBtn" disabled>Создать курс</button>
+
+        <h2>📊 Результат</h2>
+        <pre id="response">Ожидание действия...</pre>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api';
+        let token = localStorage.getItem('token') || '';
+
+        // Показать статус токена при загрузке
+        if (token) {
+            document.getElementById('tokenInfo').style.display = 'block';
+            document.getElementById('tokenInfo').innerHTML = '✅ Токен загружен из localStorage';
+            document.getElementById('coursesBtn').disabled = false;
+        }
+
+        function showStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.className = isError ? 'status error' : 'status success';
+            status.textContent = message;
+            status.style.display = 'block';
+            setTimeout(() => status.style.display = 'none', 3000);
+        }
+
+        async function register() {
+            const data = {
+                email: document.getElementById('reg-email').value,
+                username: document.getElementById('reg-username').value,
+                full_name: document.getElementById('reg-fullname').value,
+                password: document.getElementById('reg-password').value,
+                role: document.getElementById('reg-role').value
+            };
+            
+            try {
+                const res = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+                
+                if (res.ok) {
+                    showStatus('✅ Регистрация успешна! Теперь войдите.');
+                } else {
+                    showStatus('❌ Ошибка: ' + (result.detail || 'Неизвестная ошибка'), true);
+                }
+            } catch (err) {
+                document.getElementById('response').textContent = 'Ошибка: ' + err;
+                showStatus('❌ Ошибка соединения с сервером', true);
+            }
+        }
+
+        async function login() {
+            const data = {
+                username: document.getElementById('login-username').value,
+                password: document.getElementById('login-password').value
+            };
+            
+            try {
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+                
+                if (res.ok && result.access_token) {
+                    token = result.access_token;
+                    localStorage.setItem('token', token);
+                    
+                    document.getElementById('tokenInfo').style.display = 'block';
+                    document.getElementById('tokenInfo').innerHTML = '✅ Токен сохранен: <code>' + token.substring(0, 20) + '...</code>';
+                    
+                    document.getElementById('coursesBtn').disabled = false;
+                    document.getElementById('createCourseBtn').disabled = false;
+                    
+                    showStatus('✅ Вход выполнен успешно!');
+                    
+                    // Получаем информацию о пользователе
+                    getUserInfo();
+                } else {
+                    showStatus('❌ Ошибка входа: ' + (result.detail || 'Неверные данные'), true);
+                }
+            } catch (err) {
+                document.getElementById('response').textContent = 'Ошибка: ' + err;
+                showStatus('❌ Ошибка соединения с сервером', true);
+            }
+        }
+
+        async function getUserInfo() {
+            try {
+                const res = await fetch(`${API_URL}/users/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await res.json();
+                document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+                
+                if (res.ok) {
+                    const role = result.role;
+                    document.getElementById('tokenInfo').innerHTML += '<br>👤 Роль: ' + role;
+                    
+                    if (role === 'teacher') {
+                        document.getElementById('createCourseBtn').disabled = false;
+                    } else {
+                        document.getElementById('createCourseBtn').disabled = true;
+                    }
+                }
+            } catch (err) {
+                console.error('Error getting user info:', err);
+            }
+        }
+
+        async function getCourses() {
+            try {
+                const res = await fetch(`${API_URL}/courses`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await res.json();
+                document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+                
+                if (res.ok) {
+                    showStatus(`✅ Найдено курсов: ${result.length}`);
+                } else {
+                    showStatus('❌ Ошибка: ' + (result.detail || 'Неизвестная ошибка'), true);
+                }
+            } catch (err) {
+                document.getElementById('response').textContent = 'Ошибка: ' + err;
+                showStatus('❌ Ошибка соединения с сервером', true);
+            }
+        }
+
+        async function createCourse() {
+            const data = {
+                name: document.getElementById('course-name').value,
+                code: document.getElementById('course-code').value,
+                description: document.getElementById('course-description').value,
+                academic_year: document.getElementById('course-year').value,
+                semester: parseInt(document.getElementById('course-semester').value)
+            };
+            
+            try {
+                const res = await fetch(`${API_URL}/courses`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+                
+                if (res.ok) {
+                    showStatus('✅ Курс успешно создан!');
+                    getCourses(); // Показать обновленный список
+                } else {
+                    showStatus('❌ Ошибка: ' + (result.detail || 'Нет прав для создания курса'), true);
+                }
+            } catch (err) {
+                document.getElementById('response').textContent = 'Ошибка: ' + err;
+                showStatus('❌ Ошибка соединения с сервером', true);
+            }
+        }
+    </script>
+</body>
+</html>
