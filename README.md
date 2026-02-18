@@ -29,7 +29,7 @@
 | 8 | **Полсачев Матвей Анатольевич** | [⏳В Процессе...⏳]() |
 | 9 | **Рукас Вероника Олеговна** | [Burnshtein](https://github.com/Burnshtein/PKOvchinnikova_21IS_4semestr_RukasV) |
 | 10 | **Силаков Максим Андреевич** | [Grozard](https://github.com/Grozard/PKOvchinnikova_21IS_4semestr_Silakov) |
-| 11 | **Тараканова Андрей Андреевич** | [20.01.26](https://github.com/andreitar3/20.01.26) |
+| 11 | **Тараканова Андрей Андреевич** | [andreitar3](https://github.com/PKO001Classroom/PKOvchinnikova_21IS_4semestr_Tarakanov) |
 | 12 | **Удин Дмитрий Максимович** | [prostoflytre](https://github.com/prostoflytre/modelup) |
 | 13 | **Фисенко Анна Андреевна** | [Fisai](https://github.com/Fisai/PKOvchinikova_21IS_4semestr_FisenkoAA) |
 | 14 | **Шабанов Даниил Алексеевич** | [fertak08](https://github.com/fertak08/PKOvchinnikova_21IS_4semestr_Shabanov) |
