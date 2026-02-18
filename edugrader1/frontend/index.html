@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EduGrader API Тест</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            padding: 20px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: #f0f2f5;
+        }
+        .container { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 15px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #1a73e8; margin-top: 0; }
+        h2 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        input, button, select { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 8px 0; 
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        button { 
+            background: #1a73e8; 
+            color: white; 
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        button:hover { background: #1557b0; }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        pre { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 8px;
+            overflow: auto;
+            max-height: 300px;
+            border: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+        .status { 
+            padding: 12px; 
+            border-radius: 8px; 
+            margin: 10px 0;
+            display: none;
+        }
+        .success { 
+            background: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        .error { 
+            background: #f8d7da; 
+            color: #721c24; 
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+        .token-box {
+            background: #e8f0fe;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .section {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 EduGrader API Тестирование</h1>
+        <p>Сервер: <strong>http://localhost:8000</strong></p>
+        
+        <div id="status" class="status"></div>
+        
+        <div id="tokenInfo" class="token-box" style="display: none;">
+            <strong>🔑 Токен:</strong> <span id="tokenValue"></span>
+        </div>
+
+        <div class="section">
+            <h2>🔐 Регистрация (POST /api/register)</h2>
+            <input type="email" id="reg-email" placeholder="Email" value="test@example.com">
+            <input type="text" id="reg-username" placeholder="Username" value="testuser">
+            <input type="text" id="reg-fullname" placeholder="Full Name" value="Тестовый Пользователь">
+            <input type="password" id="reg-password" placeholder="Password" value="password123">
+            <select id="reg-role">
+                <option value="student">Студент</option>
+                <option value="teacher">Преподаватель</option>
+            </select>
+            <button onclick="register()">Зарегистрироваться</button>
+        </div>
+
+        <div class="section">
+            <h2>🔑 Вход (POST /api/token)</h2>
+            <input type="text" id="login-username" placeholder="Username" value="testuser">
+            <input type="password" id="login-password" placeholder="Password" value="password123">
+            <button onclick="login()">Войти</button>
+        </div>
+
+        <div class="section">
+            <h2>📋 Мои курсы (GET /api/courses)</h2>
+            <button onclick="getCourses()" id="coursesBtn" disabled>Получить список курсов</button>
+        </div>
+
+        <div class="section">
+            <h2>➕ Создать курс (POST /api/courses)</h2>
+            <input type="text" id="course-name" placeholder="Название курса" value="Python Programming">
+            <input type="text" id="course-code" placeholder="Код курса" value="PY101">
+            <textarea id="course-description" placeholder="Описание" rows="3">Основы программирования на Python</textarea>
+            <input type="text" id="course-year" placeholder="Учебный год" value="2024">
+            <input type="number" id="course-semester" placeholder="Семестр" value="1">
+            <button onclick="createCourse()" id="createCourseBtn" disabled>Создать курс</button>
+        </div>
+
+        <div class="section">
+            <h2>📊 Мои оценки (GET /api/my-grades)</h2>
+            <button onclick="getMyGrades()" id="gradesBtn" disabled>Получить мои оценки</button>
+        </div>
+
+        <div class="section">
+            <h2>📝 Результат запроса</h2>
+            <pre id="response">Ожидание действия...</pre>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api';
+        let token = localStorage.getItem('token') || '';
+
+        // Показать токен если есть
+        if (token) {
+            document.getElementById('tokenInfo').style.display = 'block';
+            document.getElementById('tokenValue').textContent = token.substring(0, 50) + '...';
+            enableButtons();
+        }
+
+        function showStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.className = 'status ' + type;
+            status.textContent = message;
+            status.style.display = 'block';
+            setTimeout(() => status.style.display = 'none', 5000);
+        }
+
+        function enableButtons() {
+            document.getElementById('coursesBtn').disabled = false;
+            document.getElementById('createCourseBtn').disabled = false;
+            document.getElementById('gradesBtn').disabled = false;
+        }
+
+        async function register() {
+            const data = {
+                email: document.getElementById('reg-email').value,
+                username: document.getElementById('reg-username').value,
+                full_name: document.getElementById('reg-fullname').value,
+                password: document.getElementById('reg-password').value,
+                role: document.getElementById('reg-role').value
+            };
+            
+            try {
+                showStatus('Отправка запроса...', 'info');
+                
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+                
+                if (response.ok) {
+                    showStatus('✅ Регистрация успешна! Теперь войдите в систему.', 'success');
+                } else {
+                    showStatus('❌ Ошибка: ' + (result.detail || 'Ошибка регистрации'), 'error');
+                }
+            } catch (error) {
+                document.getElementById('response').textContent = 'Ошибка соединения: ' + error;
+                showStatus('❌ Не удалось подключиться к серверу', 'error');
+            }
+        }
+
+        async function login() {
+            const formData = new FormData();
+            formData.append('username', document.getElementById('login-username').value);
+            formData.append('password', document.getElementById('login-password').value);
+            
+            try {
+                showStatus('Отправка запроса...', 'info');
+                
+                const response = await fetch(`${API_URL}/token`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+                
+                if (response.ok && result.access_token) {
+                    token = result.access_token;
+                    localStorage.setItem('token', token);
+                    
+                    document.getElementById('tokenInfo').style.display = 'block';
+                    document.getElementById('tokenValue').textContent = token.substring(0, 50) + '...';
+                    
+                    enableButtons();
+                    showStatus('✅ Вход выполнен успешно!', 'success');
+                } else {
+                    showStatus('❌ Ошибка входа: ' + (result.detail || 'Неверные данные'), 'error');
+                }
+            } catch (error) {
+                document.getElementById('response').textContent = 'Ошибка соединения: ' + error;
+                showStatus('❌ Не удалось подключиться к серверу', 'error');
+            }
+        }
+
+        async function getCourses() {
+            try {
+                const response = await fetch(`${API_URL}/courses`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const result = await response.json();
+                document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+                
+                if (response.ok) {
+                    showStatus(`✅ Найдено курсов: ${result.length}`, 'success');
+                } else {
+                    showStatus('❌ Ошибка: ' + (result.detail || 'Ошибка получения курсов'), 'error');
+                }
+            } catch (error) {
+                document.getElementById('response').textContent = 'Ошибка соединения: ' + error;
+                showStatus('❌ Не удалось подключиться к серверу', 'error');
+            }
+        }
+
+        async function createCourse() {
+            const data = {
+                name: document.getElementById('course-name').value,
+                code: document.getElementById('course-code').value,
+                description: document.getElementById('course-description').value,
+                academic_year: document.getElementById('course-year').value,
+                semester: parseInt(document.getElementById('course-semester').value)
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/courses`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+                
+                if (response.ok) {
+                    showStatus('✅ Курс успешно создан!', 'success');
+                } else {
+                    showStatus('❌ Ошибка: ' + (result.detail || 'Ошибка создания курса'), 'error');
+                }
+            } catch (error) {
+                document.getElementById('response').textContent = 'Ошибка соединения: ' + error;
+                showStatus('❌ Не удалось подключиться к серверу', 'error');
+            }
+        }
+
+        async function getMyGrades() {
+            try {
+                const response = await fetch(`${API_URL}/my-grades`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const result = await response.json();
+                document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+                
+                if (response.ok) {
+                    showStatus('✅ Оценки получены', 'success');
+                } else {
+                    showStatus('❌ Ошибка: ' + (result.detail || 'Ошибка получения оценок'), 'error');
+                }
+            } catch (error) {
+                document.getElementById('response').textContent = 'Ошибка соединения: ' + error;
+                showStatus('❌ Не удалось подключиться к серверу', 'error');
+            }
+        }
+    </script>
+</body>
+</html>
