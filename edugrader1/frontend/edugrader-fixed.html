@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EduGrader API Тест</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            padding: 20px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: #f0f2f5;
+        }
+        .container { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 15px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #1a73e8; }
+        .info {
+            background: #e8f0fe;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #1a73e8;
+        }
+        input, select, button { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 8px 0; 
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        button { 
+            background: #1a73e8; 
+            color: white; 
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        button:hover { background: #1557b0; }
+        pre { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 8px;
+            overflow: auto;
+            max-height: 300px;
+            border: 1px solid #e0e0e0;
+        }
+        .success { 
+            background: #d4edda; 
+            color: #155724; 
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .error { 
+            background: #f8d7da; 
+            color: #721c24; 
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 EduGrader API Тестирование</h1>
+        
+        <div class="info">
+            <strong>✅ Сервер запущен!</strong><br>
+            Адрес: http://127.0.0.1:8000<br>
+            Документация: <a href="http://127.0.0.1:8000/docs" target="_blank">http://127.0.0.1:8000/docs</a>
+        </div>
+
+        <h2>🔐 Регистрация (POST /api/register)</h2>
+        <input type="email" id="reg-email" placeholder="Email" value="alekskurnosenko55@gmail.com">
+        <input type="text" id="reg-username" placeholder="Username" value="aleks">
+        <input type="text" id="reg-fullname" placeholder="Full Name" value="Александр">
+        <input type="password" id="reg-password" placeholder="Password" value="password123">
+        <select id="reg-role">
+            <option value="student">Студент</option>
+            <option value="teacher" selected>Преподаватель</option>
+        </select>
+        <button onclick="register()">Зарегистрироваться</button>
+
+        <h2>🔑 Вход (POST /api/token)</h2>
+        <input type="text" id="login-username" placeholder="Username" value="aleks">
+        <input type="password" id="login-password" placeholder="Password" value="password123">
+        <button onclick="login()">Войти</button>
+
+        <h2>📋 Результат</h2>
+        <pre id="result">Ожидание действия...</pre>
+    </div>
+
+    <script>
+        // Используем 127.0.0.1 вместо localhost
+        const API_URL = 'http://127.0.0.1:8000/api';
+
+        async function register() {
+            const data = {
+                email: document.getElementById('reg-email').value,
+                username: document.getElementById('reg-username').value,
+                full_name: document.getElementById('reg-fullname').value,
+                password: document.getElementById('reg-password').value,
+                role: document.getElementById('reg-role').value
+            };
+            
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = '⏳ Отправка запроса...';
+            
+            try {
+                console.log('Sending to:', `${API_URL}/register`);
+                console.log('Data:', data);
+                
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                resultEl.textContent = JSON.stringify(result, null, 2);
+                
+                if (response.ok) {
+                    showMessage('✅ Регистрация успешна!', 'success');
+                } else {
+                    showMessage('❌ Ошибка: ' + (result.detail || 'Ошибка регистрации'), 'error');
+                }
+            } catch (error) {
+                resultEl.textContent = 'Ошибка соединения: ' + error;
+                showMessage('❌ Не удалось подключиться к серверу', 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        async function login() {
+            const formData = new URLSearchParams();
+            formData.append('username', document.getElementById('login-username').value);
+            formData.append('password', document.getElementById('login-password').value);
+            
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = '⏳ Отправка запроса...';
+            
+            try {
+                console.log('Sending to:', `${API_URL}/token`);
+                
+                const response = await fetch(`${API_URL}/token`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
+                
+                const result = await response.json();
+                resultEl.textContent = JSON.stringify(result, null, 2);
+                
+                if (response.ok && result.access_token) {
+                    showMessage('✅ Вход выполнен! Токен получен', 'success');
+                    localStorage.setItem('token', result.access_token);
+                } else {
+                    showMessage('❌ Ошибка: ' + (result.detail || 'Ошибка входа'), 'error');
+                }
+            } catch (error) {
+                resultEl.textContent = 'Ошибка соединения: ' + error;
+                showMessage('❌ Не удалось подключиться к серверу', 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        function showMessage(text, type) {
+            const msg = document.createElement('div');
+            msg.className = type;
+            msg.textContent = text;
+            msg.style.margin = '10px 0';
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(msg, document.getElementById('result'));
+            
+            setTimeout(() => msg.remove(), 5000);
+        }
+
+        // Проверка соединения при загрузке
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/docs');
+                if (response.ok) {
+                    showMessage('✅ Соединение с сервером установлено', 'success');
+                }
+            } catch (error) {
+                showMessage('❌ Сервер не отвечает. Проверьте, запущен ли бэкенд', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
