@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EduGrader Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; max-width: 600px; margin: 0 auto; }
+        input, button { padding: 10px; margin: 5px; width: 100%; }
+        pre { background: #f4f4f4; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>EduGrader API Test</h1>
+    
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username" value="testuser">
+    <input type="password" id="password" placeholder="Password" value="password123">
+    <button onclick="login()">Login</button>
+    
+    <h2>Register</h2>
+    <input type="email" id="reg-email" placeholder="Email" value="test@example.com">
+    <input type="text" id="reg-username" placeholder="Username" value="testuser">
+    <input type="text" id="reg-fullname" placeholder="Full Name" value="Test User">
+    <input type="password" id="reg-password" placeholder="Password" value="password123">
+    <select id="reg-role">
+        <option value="student">Student</option>
+        <option value="teacher">Teacher</option>
+    </select>
+    <button onclick="register()">Register</button>
+    
+    <h2>API Response</h2>
+    <pre id="response">Waiting for action...</pre>
+    
+    <script>
+        const API_URL = 'http://localhost:8000/api';
+        let token = '';
+
+        async function register() {
+            const data = {
+                email: document.getElementById('reg-email').value,
+                username: document.getElementById('reg-username').value,
+                full_name: document.getElementById('reg-fullname').value,
+                password: document.getElementById('reg-password').value,
+                role: document.getElementById('reg-role').value
+            };
+            
+            try {
+                const res = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+            } catch (err) {
+                document.getElementById('response').textContent = 'Error: ' + err;
+            }
+        }
+
+        async function login() {
+            const data = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
+            };
+            
+            try {
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+                if (result.access_token) {
+                    token = result.access_token;
+                    getCourses();
+                }
+            } catch (err) {
+                document.getElementById('response').textContent = 'Error: ' + err;
+            }
+        }
+
+        async function getCourses() {
+            try {
+                const res = await fetch(`${API_URL}/courses`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await res.json();
+                document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+            } catch (err) {
+                document.getElementById('response').textContent = 'Error: ' + err;
+            }
+        }
+    </script>
+</body>
+</html>
