@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EduGrader Рабочий тестер</title>
+    <style>
+        body { font-family: Arial; padding: 20px; max-width: 800px; margin: 0 auto; background: #f5f5f5; }
+        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
+        .tab { padding: 10px 20px; cursor: pointer; background: #f5f5f5; border: 1px solid #ddd; margin-right: 5px; border-radius: 5px 5px 0 0; }
+        .tab.active { background: #1a73e8; color: white; border-color: #1a73e8; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .section { background: #f9f9f9; padding: 20px; border-radius: 10px; margin: 20px 0; }
+        input, select, textarea, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        button { background: #1a73e8; color: white; border: none; cursor: pointer; font-size: 16px; font-weight: bold; }
+        button:hover { background: #1557b0; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 8px; overflow: auto; max-height: 300px; border: 1px solid #e0e0e0; }
+        .success { background: #d4edda; color: #155724; padding: 12px; border-radius: 8px; margin: 10px 0; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; margin: 10px 0; border: 1px solid #f5c6cb; }
+        .info { background: #e7f3ff; padding: 12px; border-radius: 8px; margin: 10px 0; border: 1px solid #b8daff; }
+        .token-box { background: #e8f0fe; padding: 10px; border-radius: 5px; margin: 10px 0; word-break: break-all; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 EduGrader - Рабочее тестирование</h1>
+        
+        <!-- Информация о сервере -->
+        <div class="info" id="serverInfo">
+            🔄 Проверка подключения к серверу...
+        </div>
+
+        <!-- Токен информация -->
+        <div id="tokenInfo" class="token-box" style="display: none;">
+            <strong>🔑 Токен:</strong> <span id="tokenValue"></span><br>
+            <button onclick="logout()" style="width: auto; padding: 5px 10px; margin-top: 5px;">Выйти</button>
+        </div>
+
+        <!-- Вкладки -->
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('auth')">🔐 Аутентификация</div>
+            <div class="tab" onclick="showTab('courses')">📚 Курсы</div>
+            <div class="tab" onclick="showTab('profile')">👤 Профиль</div>
+        </div>
+
+        <!-- Вкладка Аутентификация -->
+        <div id="auth" class="tab-content active">
+            <div class="section">
+                <h3>🔐 Регистрация</h3>
+                <input type="email" id="reg-email" placeholder="Email" value="test@example.com">
+                <input type="text" id="reg-username" placeholder="Username" value="testuser">
+                <input type="text" id="reg-fullname" placeholder="Full Name" value="Тестовый Пользователь">
+                <input type="password" id="reg-password" placeholder="Password" value="password123">
+                <select id="reg-role">
+                    <option value="student">Студент</option>
+                    <option value="teacher">Преподаватель</option>
+                </select>
+                <button onclick="register()">Зарегистрироваться</button>
+            </div>
+
+            <div class="section">
+                <h3>🔑 Вход</h3>
+                <input type="text" id="login-username" placeholder="Username" value="testuser">
+                <input type="password" id="login-password" placeholder="Password" value="password123">
+                <button onclick="login()">Войти</button>
+            </div>
+
+            <div class="section">
+                <h3>🔄 Сброс пароля</h3>
+                <input type="email" id="reset-email" placeholder="Email" value="test@example.com">
+                <button onclick="resetPasswordRequest()">Запросить сброс</button>
+                <input type="text" id="reset-token" placeholder="Token из email">
+                <input type="password" id="new-password" placeholder="Новый пароль">
+                <button onclick="resetPasswordConfirm()">Подтвердить сброс</button>
+            </div>
+        </div>
+
+        <!-- Вкладка Курсы -->
+        <div id="courses" class="tab-content">
+            <div class="section">
+                <h3>📋 Мои курсы</h3>
+                <button onclick="getCourses()">Получить список курсов</button>
+            </div>
+
+            <div class="section">
+                <h3>➕ Создать курс</h3>
+                <input type="text" id="course-name" placeholder="Название" value="Python Programming">
+                <input type="text" id="course-code" placeholder="Код курса" value="PY101">
+                <textarea id="course-description" placeholder="Описание">Основы программирования на Python</textarea>
+                <input type="text" id="course-year" placeholder="Учебный год" value="2024">
+                <input type="number" id="course-semester" placeholder="Семестр" value="1">
+                <button onclick="createCourse()">Создать курс</button>
+            </div>
+
+            <div class="section">
+                <h3>📝 Записаться на курс</h3>
+                <input type="number" id="course-id" placeholder="ID курса">
+                <button onclick="enrollCourse()">Записаться</button>
+            </div>
+        </div>
+
+        <!-- Вкладка Профиль -->
+        <div id="profile" class="tab-content">
+            <div class="section">
+                <h3>👤 Информация о пользователе</h3>
+                <button onclick="getUserInfo()">Получить информацию</button>
+            </div>
+        </div>
+
+        <!-- Результат -->
+        <div class="section">
+            <h3>📋 Результат</h3>
+            <pre id="result">Ожидание действия...</pre>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://127.0.0.1:8000/api';
+        let token = localStorage.getItem('token') || '';
+
+        // Проверка сервера при загрузке
+        window.onload = async function() {
+            const serverInfo = document.getElementById('serverInfo');
+            try {
+                const response = await fetch('http://127.0.0.1:8000/');
+                if (response.ok) {
+                    serverInfo.className = 'success';
+                    serverInfo.innerHTML = '✅ Сервер подключен! http://127.0.0.1:8000';
+                } else {
+                    serverInfo.className = 'error';
+                    serverInfo.innerHTML = '❌ Сервер не отвечает! Запустите сервер командой: uvicorn app.main_simple:app --reload';
+                }
+            } catch (error) {
+                serverInfo.className = 'error';
+                serverInfo.innerHTML = '❌ Сервер не доступен! Запустите сервер командой: uvicorn app.main_simple:app --reload';
+            }
+
+            // Показать токен если есть
+            if (token) {
+                document.getElementById('tokenInfo').style.display = 'block';
+                document.getElementById('tokenValue').textContent = token.substring(0, 30) + '...';
+            }
+        };
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            token = '';
+            document.getElementById('tokenInfo').style.display = 'none';
+            showResult('Вы вышли из системы');
+        }
+
+        function showResult(message) {
+            document.getElementById('result').textContent = message;
+        }
+
+        async function apiCall(url, options) {
+            showResult('⏳ Отправка запроса...');
+            try {
+                const response = await fetch(url, options);
+                const data = await response.json();
+                showResult(JSON.stringify({
+                    status: response.status,
+                    statusText: response.statusText,
+                    data: data
+                }, null, 2));
+                return { response, data };
+            } catch (error) {
+                showResult('❌ Ошибка: ' + error.message);
+                throw error;
+            }
+        }
+
+        // Аутентификация
+        async function register() {
+            const data = {
+                email: document.getElementById('reg-email').value,
+                username: document.getElementById('reg-username').value,
+                full_name: document.getElementById('reg-fullname').value,
+                password: document.getElementById('reg-password').value,
+                role: document.getElementById('reg-role').value
+            };
+            
+            await apiCall(`${BASE_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        }
+
+        async function login() {
+            const data = {
+                username: document.getElementById('login-username').value,
+                password: document.getElementById('login-password').value
+            };
+            
+            const { response, data: result } = await apiCall(`${BASE_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok && result.access_token) {
+                token = result.access_token;
+                localStorage.setItem('token', token);
+                document.getElementById('tokenInfo').style.display = 'block';
+                document.getElementById('tokenValue').textContent = token.substring(0, 30) + '...';
+            }
+        }
+
+        async function resetPasswordRequest() {
+            const data = {
+                email: document.getElementById('reset-email').value
+            };
+            
+            await apiCall(`${BASE_URL}/auth/reset-password-request`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        }
+
+        async function resetPasswordConfirm() {
+            const data = {
+                token: document.getElementById('reset-token').value,
+                new_password: document.getElementById('new-password').value
+            };
+            
+            await apiCall(`${BASE_URL}/auth/reset-password-confirm`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        }
+
+        // Профиль
+        async function getUserInfo() {
+            await apiCall(`${BASE_URL}/users/me?token=${token}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        }
+
+        // Курсы
+        async function getCourses() {
+            await apiCall(`${BASE_URL}/courses?token=${token}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        }
+
+        async function createCourse() {
+            const data = {
+                name: document.getElementById('course-name').value,
+                code: document.getElementById('course-code').value,
+                description: document.getElementById('course-description').value,
+                academic_year: document.getElementById('course-year').value,
+                semester: parseInt(document.getElementById('course-semester').value)
+            };
+            
+            await apiCall(`${BASE_URL}/courses?token=${token}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            });
+        }
+
+        async function enrollCourse() {
+            const courseId = document.getElementById('course-id').value;
+            await apiCall(`${BASE_URL}/courses/${courseId}/enroll?token=${token}`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        }
+    </script>
+</body>
+</html>
