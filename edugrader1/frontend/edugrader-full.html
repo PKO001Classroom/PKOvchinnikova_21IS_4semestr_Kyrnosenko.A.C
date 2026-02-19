@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EduGrader Full Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; max-width: 1200px; margin: 0 auto; background: #f0f2f5; }
+        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
+        .tab { padding: 10px 20px; cursor: pointer; background: #f5f5f5; border: 1px solid #ddd; margin-right: 5px; border-radius: 5px 5px 0 0; }
+        .tab.active { background: #1a73e8; color: white; border-color: #1a73e8; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .section { background: #f9f9f9; padding: 20px; border-radius: 10px; margin: 20px 0; }
+        input, select, textarea, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { background: #1a73e8; color: white; border: none; cursor: pointer; font-size: 16px; }
+        button:hover { background: #1557b0; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 8px; overflow: auto; max-height: 400px; }
+        .success { background: #d4edda; color: #155724; padding: 12px; border-radius: 8px; margin: 10px 0; }
+        .error { background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; margin: 10px 0; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .notification { background: #e7f3ff; padding: 10px; border-radius: 5px; margin: 5px 0; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 EduGrader - Полное тестирование</h1>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('auth')">🔐 Аутентификация</div>
+            <div class="tab" onclick="showTab('courses')">📚 Курсы</div>
+            <div class="tab" onclick="showTab('assignments')">📝 Задания</div>
+            <div class="tab" onclick="showTab('grades')">📊 Оценки</div>
+            <div class="tab" onclick="showTab('admin')">⚙️ Админ</div>
+            <div class="tab" onclick="showTab('notifications')">🔔 Уведомления</div>
+        </div>
+
+        <!-- Auth Tab -->
+        <div id="auth" class="tab-content active">
+            <div class="section">
+                <h3>🔐 Регистрация</h3>
+                <input type="email" id="reg-email" placeholder="Email" value="test@example.com">
+                <input type="text" id="reg-username" placeholder="Username" value="testuser">
+                <input type="text" id="reg-fullname" placeholder="Full Name" value="Тестовый Пользователь">
+                <input type="password" id="reg-password" placeholder="Password" value="password123">
+                <select id="reg-role">
+                    <option value="student">Студент</option>
+                    <option value="teacher">Преподаватель</option>
+                    <option value="admin">Администратор</option>
+                </select>
+                <button onclick="register()">Зарегистрироваться</button>
+            </div>
+
+            <div class="section">
+                <h3>🔑 Вход</h3>
+                <input type="text" id="login-username" placeholder="Username" value="testuser">
+                <input type="password" id="login-password" placeholder="Password" value="password123">
+                <button onclick="login()">Войти</button>
+            </div>
+
+            <div class="section">
+                <h3>🔄 Сброс пароля</h3>
+                <input type="email" id="reset-email" placeholder="Email" value="test@example.com">
+                <button onclick="resetPasswordRequest()">Запросить сброс</button>
+                <input type="text" id="reset-token" placeholder="Token из email">
+                <input type="password" id="new-password" placeholder="Новый пароль">
+                <button onclick="resetPasswordConfirm()">Подтвердить сброс</button>
+            </div>
+        </div>
+
+        <!-- Courses Tab -->
+        <div id="courses" class="tab-content">
+            <div class="section">
+                <h3>📋 Мои курсы</h3>
+                <button onclick="getCourses()">Получить курсы</button>
+            </div>
+
+            <div class="section">
+                <h3>➕ Создать курс</h3>
+                <input type="text" id="course-name" placeholder="Название" value="Python Programming">
+                <input type="text" id="course-code" placeholder="Код" value="PY101">
+                <textarea id="course-description" placeholder="Описание">Основы Python</textarea>
+                <input type="text" id="course-year" placeholder="Год" value="2024">
+                <input type="number" id="course-semester" placeholder="Семестр" value="1">
+                <button onclick="createCourse()">Создать курс</button>
+            </div>
+
+            <div class="section">
+                <h3>📝 Записаться на курс</h3>
+                <input type="number" id="enroll-course-id" placeholder="ID курса">
+                <button onclick="enrollCourse()">Записаться</button>
+            </div>
+        </div>
+
+        <!-- Assignments Tab -->
+        <div id="assignments" class="tab-content">
+            <div class="section">
+                <h3>📝 Задания курса</h3>
+                <input type="number" id="assignments-course-id" placeholder="ID курса">
+                <button onclick="getAssignments()">Получить задания</button>
+            </div>
+
+            <div class="section">
+                <h3>➕ Создать задание</h3>
+                <input type="number" id="new-assignment-course" placeholder="ID курса">
+                <input type="text" id="assignment-title" placeholder="Название" value="Лабораторная работа">
+                <textarea id="assignment-description" placeholder="Описание">Выполните задание</textarea>
+                <input type="number" id="assignment-max-score" placeholder="Макс. балл" value="100">
+                <input type="datetime-local" id="assignment-deadline">
+                <label>
+                    <input type="checkbox" id="assignment-allow-resubmit"> Разрешить пересдачу
+                </label>
+                <button onclick="addCriteria()">Добавить критерий</button>
+                <div id="criteria-list"></div>
+                <button onclick="createAssignment()">Создать задание</button>
+            </div>
+
+            <div class="section">
+                <h3>📤 Загрузить работу</h3>
+                <input type="number" id="submit-assignment-id" placeholder="ID задания">
+                <textarea id="submit-comment" placeholder="Комментарий"></textarea>
+                <input type="file" id="submit-file">
+                <button onclick="saveDraft()">Сохранить черновик</button>
+                <button onclick="submitWork()">Отправить работу</button>
+            </div>
+
+            <div class="section">
+                <h3>📋 Список работ</h3>
+                <input type="number" id="submissions-assignment-id" placeholder="ID задания">
+                <button onclick="getSubmissions()">Получить работы</button>
+            </div>
+        </div>
+
+        <!-- Grades Tab -->
+        <div id="grades" class="tab-content">
+            <div class="section">
+                <h3>📊 Мои оценки</h3>
+                <input type="number" id="student-id" placeholder="ID студента">
+                <button onclick="getStudentGrades()">Получить оценки</button>
+                <button onclick="getStudentSummary()">Сводка успеваемости</button>
+            </div>
+
+            <div class="section">
+                <h3>⭐ Выставить оценку</h3>
+                <input type="number" id="grade-submission-id" placeholder="ID работы">
+                <div id="grade-criteria"></div>
+                <textarea id="grade-feedback" placeholder="Отзыв"></textarea>
+                <button onclick="createGrade()">Выставить оценку</button>
+            </div>
+
+            <div class="section">
+                <h3>📈 Аналитика курса</h3>
+                <input type="number" id="analytics-course-id" placeholder="ID курса">
+                <button onclick="getCourseAnalytics()">Аналитика</button>
+            </div>
+
+            <div class="section">
+                <h3>📥 Экспорт оценок</h3>
+                <input type="number" id="export-course-id" placeholder="ID курса">
+                <button onclick="exportGrades()">Скачать CSV</button>
+            </div>
+
+            <div class="section">
+                <h3>💬 Шаблоны комментариев</h3>
+                <button onclick="getTemplates()">Получить шаблоны</button>
+                <input type="text" id="new-template-text" placeholder="Текст шаблона">
+                <select id="template-category">
+                    <option value="positive">Положительный</option>
+                    <option value="neutral">Нейтральный</option>
+                    <option value="negative">Отрицательный</option>
+                </select>
+                <button onclick="createTemplate()">Создать шаблон</button>
+            </div>
+        </div>
+
+        <!-- Admin Tab -->
+        <div id="admin" class="tab-content">
+            <div class="section">
+                <h3>👥 Управление пользователями</h3>
+                <input type="text" id="user-search" placeholder="Поиск">
+                <button onclick="getUsers()">Все пользователи</button>
+                <button onclick="searchUsers()">Поиск</button>
+                <div id="user-list"></div>
+            </div>
+
+            <div class="section">
+                <h3>📤 Импорт из CSV</h3>
+                <input type="file" id="csv-file" accept=".csv">
+                <button onclick="importUsers()">Импортировать</button>
+            </div>
+
+            <div class="section">
+                <h3>📋 Логи аудита</h3>
+                <button onclick="getAuditLogs()">Получить логи</button>
+            </div>
+        </div>
+
+        <!-- Notifications Tab -->
+        <div id="notifications" class="tab-content">
+            <div class="section">
+                <h3>🔔 Мои уведомления</h3>
+                <button onclick="getNotifications()">Обновить</button>
+                <div id="notifications-list"></div>
+            </div>
+        </div>
+
+        <!-- Result -->
+        <div class="section">
+            <h3>📋 Результат</h3>
+            <pre id="result">Ожидание действия...</pre>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://127.0.0.1:8000/api';
+        let token = localStorage.getItem('token') || '';
+        let criteriaList = [];
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        async function apiCall(url, options) {
+            const resultEl = document.getElementById('result');
+            try {
+                const response = await fetch(url, options);
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+                return { response, data };
+            } catch (error) {
+                resultEl.textContent = 'Ошибка: ' + error;
+                throw error;
+            }
+        }
+
+        // Auth functions
+        async function register() {
+            const data = {
+                email: document.getElementById('reg-email').value,
+                username: document.getElementById('reg-username').value,
+                full_name: document.getElementById('reg-fullname').value,
+                password: document.getElementById('reg-password').value,
+                role: document.getElementById('reg-role').value
+            };
+            await apiCall(`${BASE_URL}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        }
+
+        async function login() {
+            const data = {
+                username: document.getElementById('login-username').value,
+                password: document.getElementById('login-password').value
+            };
+            const { response, data: result } = await apiCall(`${BASE_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (response.ok && result.access_token) {
+                token = result.access_token;
+                localStorage.setItem('token', token);
+                alert('Вход выполнен!');
+            }
+        }
+
+        async function resetPasswordRequest() {
+            const data = {
+                email: document.getElementById('reset-email').value
+            };
+            await apiCall(`${BASE_URL}/auth/reset-password-request`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        }
+
+        async function resetPasswordConfirm() {
+            const data = {
+                token: document.getElementById('reset-token').value,
+                new_password: document.getElementById('new-password').value
+            };
+            await apiCall(`${BASE_URL}/auth/reset-password-confirm`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        }
+
+        // Course functions
+        async function getCourses() {
+            await apiCall(`${BASE_URL}/courses`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        }
+
+        async function createCourse() {
+            const data = {
+                name: document.getElementById('course-name').value,
+                code: document.getElementById('course-code').value,
+                description: document.getElementById('course-description').value,
+                academic_year: document.getElementById('course-year').value,
+                semester: parseInt(document.getElementById('course-semester').value)
+            };
+            await apiCall(`${BASE_URL}/courses`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            });
+        }
+
+        async function enrollCourse() {
+            const courseId = document.getElementById('enroll-course-id').value;
+            await apiCall(`${BASE_URL}/courses/${courseId}/enroll`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        }
+
+        // Assignment functions
+        async function getAssignments() {
+            const courseId = document.getElementById('assignments-course-id').value;
+            await apiCall(`${BASE_URL}/assignments/course/${courseId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        }
+
+        function addCriteria() {
+            const name = prompt('Название критерия:');
+            const maxScore = prompt('Максимальный балл:');
+            if (name && maxScore) {
+                criteriaList.push({ name, max_score: parseFloat(maxScore) });
+                document.getElementById('criteria-list').innerHTML = criteriaList
+                    .map(c => `<div>${c.name} (${c.max_score} баллов)</div>`).join('');
+            }
+        }
+
+        async function createAssignment() {
+            const deadline = document.getElementById('assignment-deadline').value;
+            const data = {
+                course_id: parseInt(document.getElementById('new-assignment-course').value),
+                title: document.getElementById('assignment-title').value,
+                description: document.getElementById('assignment-description').value,
+                max_score: parseFloat(document.getElementById('assignment-max-score').value),
+                criteria: criteriaList,
+                deadline: new Date(deadline).toISOString(),
+                allow_resubmit: document.getElementById('assignment-allow-resubmit').checked
+            };
+            await apiCall(`${BASE_URL}/assignments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            });
+            criteriaList = [];
+            document.getElementById('criteria-list').innerHTML = '';
+        }
+
+        async function saveDraft() {
+            const formData = new FormData();
+            formData.append('assignment_id', document.getElementById('submit-assignment-id').value);
+            formData.append('comment', document.getElementById('submit-comment').value);
+            formData.append('token', token);
+            
+            await apiCall(`${BASE_URL}/submissions/draft`, {
+                method: 'POST',
+                body: formData
+            });
+        }
+
+        async function submitWork() {
+            const file = document.getElementById('submit-file').files[0];
+            const formData = new FormData();
+            formData.append('assignment_id', document.getElementById('submit-assignment-id').value);
+            formData.append('comment', document.getElementById('submit-comment').value);
+            formData.append('file', file);
+            formData.append('token', token);
+            
+            await apiCall(`${BASE_URL}/submissions`, {
+                method: 'POST',
+                body: formData
+            });
+        }
+
+        async function getSubmissions() {
+            const assignmentId = document.getElementById('submissions-assignment-id').value;
+            await apiCall(`${BASE_URL}/submissions/assignment/${assignmentId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        }
+
+        // Grade functions
+        async function getStudentGrades() {
+            const studentId = document.getElementById('student-id').value;
+            await apiCall(`${BASE_URL}/grades/student/${studentId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        }
+
+        async function getStudentSummary() {
+            const studentId = document.getElementById('student-id').value;
+            await apiCall(`${BASE_URL}/grades/student/${studentId}/summary`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        }
+
+        async function createGrade() {
+            const data = {
+                submission_id: parseInt(document.getElementById('grade-submission-id').value),
+                scores: { 'criteria1': 25 }, // Упрощенно
+                feedback: document.getElementById('grade-feedback').value
+            };
+            await apiCall(`${BASE_URL}/grades`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            });
+        }
+
+        async function getCourseAnalytics() {
+            const courseId = document.getElementById('analytics-course-id').value;
+            await apiCall(`${BASE_URL}/analytics/course/${courseId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        }
+
+        async function exportGrades() {
+            const courseId = document.getElementById('export-course-id').value;
+            window.open(`${BASE_URL}/export/grades/${courseId}?format=csv&token=${token}`);
+        }
+
+        async function getTemplates() {
+            await apiCall(`${BASE_URL}/comments/templates`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        }
+
+        async function createTemplate() {
+            const data = {
+                comment_text: document.getElementById('new-template-text').value,
+                category: document.getElementById('template-category').value
+            };
+            await apiCall(`${BASE_URL}/comments/templates`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            });
+        }
+
+        // Admin functions
+        async function getUsers() {
+            await apiCall(`${BASE_URL}/users`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        }
+
+        async function searchUsers() {
+            const search = document.getElementById('user-search').value;
+            await apiCall(`${BASE_URL}/users?search=${encodeURIComponent(search)}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        }
+
+        async function importUsers() {
+            const file = document.getElementById('csv-file').files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('token', token);
+            
+            await apiCall(`${BASE_URL}/users/import-csv`, {
+                method: 'POST',
+                body: formData
+            });
+        }
+
+        async function getAuditLogs() {
+            await apiCall(`${BASE_URL}/audit-logs`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        }
+
+        // Notification functions
+        async function getNotifications() {
+            const { data } = await apiCall(`${BASE_URL}/notifications`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            const list = document.getElementById('notifications-list');
+            list.innerHTML = data.map(n => `
+                <div class="notification">
+                    <div>
+                        <strong>${n.title}</strong><br>
+                        ${n.message}
+                    </div>
+                    <small>${new Date(n.created_at).toLocaleString()}</small>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
