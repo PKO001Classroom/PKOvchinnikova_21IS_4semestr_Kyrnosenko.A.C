@@ -42,25 +42,53 @@
 
 ```
 📦 Репозиторий учебной практики
-├── 📁 документация/                     # Основная документация проекта
-│   ├── 📄 Бизнес требования.md          # Business Requirements Document
-│   ├── 📄 Use case.md                   # use case
-│   ├── 📄 Архитектурная документация.md # Architectural Documentation
-│   ├── 📄 Техническое задание.md        # Technical Specification
-│   ├── 📄 пользовательские истории.md   # User Stories
-│   ├── 📄 План тестирования.md          # Test Plan
-│   ├── 📄 руководство пользователя.md   # User Manual
-│   ├── 📄 Системный анализ.md           # System Analysis
-│   └── 📄 Глоссарий.md                  # Glossary of Terms
-|   └── 📄 README.md                         # Этот файл (главная навигация)
+├── .gitignore                         # Это чтобы доп. программы не занимали много место в репозитории                       
+├── README.md                          # Этот файл (главная навигация)
+├── План (УП.01).md                    # План учебной практики
+├── Сравнение того что есть и нету.md  # Это таблица сравнивает что есть у меня в документации и чего нет
 │
-├── 📄 @Код_к_диаграмме_UML.md           # Расположен код и диаграмма UML
-├── 📄 README.md                         # Этот файл (главная навигация)
-├── 📄 Конспект.md                       # Это, про UML
-├── 📄 Приемка.md                        # Это оцнка приложения
-├── 📄 Сравнение того что есть и нету.md # Это таблица сравнивает что есть у меня в документации
-│                                          и чего нет
-└── 📄 План УП.01.md                     # План учебной практики
+├── docs/                # Основная документация проекта и не только
+│   ├── requirements/    # Документация по самому проекту
+│   │   ├── architectural-documentation.md    # Architectural Documentation
+│   │   ├── business-requirements.md          # Business Requirements Document
+│   │   ├── glossary.md                       # Glossary of Terms
+│   │   ├── nepali-stories.md                 # Test Plan
+│   │   ├── system-analysis.md                # System Analysis
+│   │   ├── technical-specification.md        # Technical Specification
+│   │   ├── testing-plan.md                   # Test Plan
+│   │   ├── use-case.md                       # use case
+│   │   └── user-guide.md                     # User Manual
+│   │
+│   └── uml/           # Докумнтация не по самому проекту
+│       ├── @Код_к_диаграмме_UML.md       # Расположен код и диаграмма UML
+│       ├── Конспект.md                   # Это, про UML
+│       └── Приемка.md                    # Это оценка моего приложения
+│
+├── edugrader1/                                # Название проекта и что в нем находится
+│   ├── backend/                               # Основная директория бэкенда
+│   │   ├── app/                               # Модуль приложения (папка)
+│   │   ├── edugrader.db                        # Файл базы данных SQLite
+│   │   ├── main.py                             # Вход программы1
+│   │   ├── main_simple.py                      # Вход программы2 (Улучшенный)
+│   │   ├── models.py                           # Модели программы
+│   │   ├── requirements.txt                    # Зависимости (Библиотеки) python
+│   │   ├── schemas.py                          # Куда надо вводить
+│   │   └── edugrader.db                        # Дубликат файла БД 
+│   │
+│   └── frontend/                              # Основная директория
+│       └── src/
+│       |    ├── App.js
+│       |    ├── api.js
+│       |    ├── index.js
+│       ├── edugrader-diagnostic.html
+│       ├── edugrader-final.html
+│       ├── edugrader-fixed.html
+│       ├── edugrader-full.html
+│       ├── edugrader-manual.html
+│       |── edugrader-test.html
+│       ├── index.html
+│       ├── package.json
+│       └── test-frontend.html
 ```
 
 ---
