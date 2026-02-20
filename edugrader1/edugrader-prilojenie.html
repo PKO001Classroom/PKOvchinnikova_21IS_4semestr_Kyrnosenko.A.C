@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EduGrader - Система управления курсами</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #1a237e;
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-info {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .role-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .role-student { background: #4caf50; color: white; }
+        .role-teacher { background: #ff9800; color: white; }
+        .role-admin { background: #f44336; color: white; }
+        
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 2px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            border-right: 1px solid #e0e0e0;
+        }
+        
+        .tab:hover {
+            background: #e0e0e0;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #1a237e;
+            border-bottom: 3px solid #1a237e;
+        }
+        
+        .tab-content {
+            padding: 30px;
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .auth-container {
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .auth-container h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #1a237e;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 3px;
+        }
+        
+        .btn-primary {
+            background: #1a237e;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0d1757;
+        }
+        
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #388e3c;
+        }
+        
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #138496;
+        }
+        
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .course-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .course-card h3 {
+            color: #1a237e;
+            margin-bottom: 10px;
+        }
+        
+        .course-card .code {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .course-card .teacher {
+            color: #ff9800;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .course-type-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .type-regular { background: #e3f2fd; color: #0d47a1; }
+        .type-test { background: #fff3e0; color: #e65100; }
+        
+        .assignment-item {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #1a237e;
+        }
+        
+        .test-question {
+            background: #fff3e0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .test-question h5 {
+            color: #e65100;
+            margin-bottom: 10px;
+        }
+        
+        .test-option {
+            margin: 8px 0;
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .test-option.correct {
+            background: #d4edda;
+            border-color: #4caf50;
+        }
+        
+        .question-number {
+            font-weight: bold;
+            color: #1a237e;
+            margin-bottom: 5px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a237e;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .grade-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .grade-table th {
+            background: #1a237e;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .grade-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .grade-table tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 800px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #1a237e;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            color: #1a237e;
+        }
+        
+        .modal-close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .modal-close:hover {
+            color: #000;
+        }
+        
+        .modal-footer {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+        }
+        
+        .student-section {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .student-section h4 {
+            color: #1a237e;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #1a237e;
+        }
+        
+        .assignment-grade-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .work-content {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 3px solid #17a2b8;
+        }
+        
+        .work-content pre {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            overflow: auto;
+            max-height: 300px;
+            margin: 10px 0;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            animation: slideIn 0.3s;
+            z-index: 1001;
+        }
+        
+        .notification.success { background: #4caf50; }
+        .notification.error { background: #f44336; }
+        .notification.info { background: #2196f3; }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .admin-panel {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .user-list {
+            margin-top: 20px;
+        }
+        
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .submission-box {
+            background: #e8f0fe;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .submission-box textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #1a237e;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .grade-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .grade-input input {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .test-result {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            border: 2px solid #4caf50;
+        }
+        
+        .test-result h3 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+        
+        .test-score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+            
+            .course-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 EduGrader - Система управления курсами</h1>
+            <div id="userInfo" class="user-info" style="display: none;">
+                <span id="userName"></span>
+                <span id="userRole" class="role-badge"></span>
+                <button class="btn btn-danger" onclick="logout()" style="padding: 5px 10px; margin: 0;">Выйти</button>
+            </div>
+        </div>
+
+        <!-- Вкладки навигации -->
+        <div class="tabs" id="tabs">
+            <div class="tab active" onclick="showTab('auth')" id="tabAuth">🔐 Вход/Регистрация</div>
+            <div class="tab" onclick="showTab('courses')" id="tabCourses" style="display: none;">📚 Курсы</div>
+            <div class="tab" onclick="showTab('myGrades')" id="tabGrades" style="display: none;">📊 Мои оценки</div>
+            <div class="tab" onclick="showTab('profile')" id="tabProfile" style="display: none;">👤 Профиль</div>
+            <div class="tab" onclick="showTab('admin')" id="tabAdmin" style="display: none;">⚙️ Управление</div>
+        </div>
+
+        <!-- Вкладка авторизации -->
+        <div id="auth" class="tab-content active">
+            <div class="auth-container">
+                <h2>🔐 Добро пожаловать в EduGrader</h2>
+                
+                <div class="form-group">
+                    <label>Имя пользователя</label>
+                    <input type="text" id="authUsername" placeholder="Введите имя" value="teacher">
+                </div>
+                
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="authPassword" placeholder="Введите пароль" value="123">
+                </div>
+                
+                <div class="form-group">
+                    <label>Выберите действие</label>
+                    <select id="authAction">
+                        <option value="login">Войти</option>
+                        <option value="register">Зарегистрироваться</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="roleSelect" style="display: none;">
+                    <label>Роль</label>
+                    <select id="registerRole">
+                        <option value="student">Студент</option>
+                        <option value="teacher">Преподаватель</option>
+                        <option value="admin">Администратор</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-primary" onclick="handleAuth()">Продолжить</button>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                    <p><strong>Тестовые аккаунты:</strong></p>
+                    <p>👨‍🎓 Студент: student / 123</p>
+                    <p>👨‍🏫 Преподаватель: teacher / 123</p>
+                    <p>👨‍💼 Админ: admin / 123</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка курсов -->
+        <div id="courses" class="tab-content">
+            <h2>📚 Доступные курсы</h2>
+            
+            <div id="teacherControls" style="display: none; margin-bottom: 20px;">
+                <button class="btn btn-success" onclick="showCreateCourseModal()">➕ Создать новый курс</button>
+            </div>
+            
+            <div id="adminControls" style="display: none; margin-bottom: 20px;">
+                <button class="btn btn-primary" onclick="showAllCourses()">Все курсы</button>
+                <button class="btn btn-primary" onclick="showPendingCourses()">На проверке</button>
+            </div>
+            
+            <div id="coursesList" class="course-grid"></div>
+        </div>
+
+        <!-- Вкладка моих оценок -->
+        <div id="myGrades" class="tab-content">
+            <h2>📊 Мои оценки</h2>
+            <div id="gradesList"></div>
+        </div>
+
+        <!-- Вкладка профиля -->
+        <div id="profile" class="tab-content">
+            <h2>👤 Профиль пользователя</h2>
+            <div id="profileInfo" class="admin-panel"></div>
+        </div>
+
+        <!-- Вкладка администратора -->
+        <div id="admin" class="tab-content">
+            <h2>⚙️ Панель администратора</h2>
+            
+            <div class="admin-panel">
+                <h3>Статистика системы</h3>
+                <div id="systemStats"></div>
+            </div>
+            
+            <div class="admin-panel">
+                <h3>Управление пользователями</h3>
+                <button class="btn btn-success" onclick="showAddUserModal()">➕ Добавить пользователя</button>
+                <div id="usersList" class="user-list"></div>
+            </div>
+            
+            <div class="admin-panel">
+                <h3>Все курсы</h3>
+                <div id="allCoursesList"></div>
+            </div>
+            
+            <div class="admin-panel">
+                <h3>Все оценки</h3>
+                <div id="allGradesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно создания курса -->
+    <div id="createCourseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>➕ Создание нового курса</h2>
+                <span class="modal-close" onclick="closeModal('createCourseModal')">&times;</span>
+            </div>
+            
+            <div class="form-group">
+                <label>Тип курса</label>
+                <select id="courseType">
+                    <option value="regular">📚 Обычный курс (с заданиями)</option>
+                    <option value="test">📝 Тест (автоматическая генерация)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Название курса</label>
+                <input type="text" id="courseName" placeholder="Например: Программирование на Python">
+            </div>
+            
+            <div class="form-group">
+                <label>Код курса</label>
+                <input type="text" id="courseCode" placeholder="Например: PYTHON101">
+            </div>
+            
+            <div class="form-group">
+                <label>Описание</label>
+                <textarea id="courseDescription" rows="4" placeholder="Опишите содержание курса..."></textarea>
+            </div>
+            
+            <div id="testSettings" style="display: none;">
+                <div class="form-group">
+                    <label>Тема теста</label>
+                    <select id="testTopic">
+                        <option value="python">Python программирование</option>
+                        <option value="math">Математика</option>
+                        <option value="history">История</option>
+                        <option value="physics">Физика</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Количество вопросов</label>
+                    <select id="questionCount">
+                        <option value="5">5 вопросов</option>
+                        <option value="10" selected>10 вопросов</option>
+                        <option value="15">15 вопросов</option>
+                        <option value="20">20 вопросов</option>
+                        <option value="25">25 вопросов</option>
+                        <option value="30">30 вопросов</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Сложность</label>
+                    <select id="difficulty">
+                        <option value="easy">Лёгкий</option>
+                        <option value="medium" selected>Средний</option>
+                        <option value="hard">Сложный</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="createCourse()">Создать курс</button>
+                <button class="btn btn-danger" onclick="closeModal('createCourseModal')">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно прохождения теста -->
+    <div id="takeTestModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📝 Прохождение теста</h2>
+                <span class="modal-close" onclick="closeModal('takeTestModal')">&times;</span>
+            </div>
+            <div id="testForm"></div>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления пользователя -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>➕ Добавление пользователя</h2>
+                <span class="modal-close" onclick="closeModal('addUserModal')">&times;</span>
+            </div>
+            
+            <div class="form-group">
+                <label>Имя пользователя</label>
+                <input type="text" id="newUsername">
+            </div>
+            
+            <div class="form-group">
+                <label>Пароль</label>
+                <input type="password" id="newPassword">
+            </div>
+            
+            <div class="form-group">
+                <label>Роль</label>
+                <select id="newRole">
+                    <option value="student">Студент</option>
+                    <option value="teacher">Преподаватель</option>
+                    <option value="admin">Администратор</option>
+                </select>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="addUser()">Добавить</button>
+                <button class="btn btn-danger" onclick="closeModal('addUserModal')">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно создания задания -->
+    <div id="createAssignmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📝 Создание нового задания</h2>
+                <span class="modal-close" onclick="closeModal('createAssignmentModal')">&times;</span>
+            </div>
+            <div id="assignmentForm"></div>
+        </div>
+    </div>
+
+    <!-- Модальное окно отправки задания -->
+    <div id="submitAssignmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📤 Отправка задания</h2>
+                <span class="modal-close" onclick="closeModal('submitAssignmentModal')">&times;</span>
+            </div>
+            <div id="submitForm"></div>
+        </div>
+    </div>
+
+    <!-- Модальное окно выставления оценки -->
+    <div id="gradeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⭐ Управление оценками</h2>
+                <span class="modal-close" onclick="closeModal('gradeModal')">&times;</span>
+            </div>
+            <div id="gradeForm"></div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" onclick="closeModal('gradeModal')">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация базы данных
+        let db = {
+            users: JSON.parse(localStorage.getItem('users')) || [],
+            courses: JSON.parse(localStorage.getItem('courses')) || [],
+            assignments: JSON.parse(localStorage.getItem('assignments')) || [],
+            submissions: JSON.parse(localStorage.getItem('submissions')) || [],
+            enrollments: JSON.parse(localStorage.getItem('enrollments')) || [],
+            grades: JSON.parse(localStorage.getItem('grades')) || [],
+            testResults: JSON.parse(localStorage.getItem('testResults')) || [],
+            currentUser: JSON.parse(localStorage.getItem('currentUser')) || null
+        };
+
+        // РАСШИРЕННАЯ БАЗА ЗНАНИЙ для генерации тестов
+        const questionTemplates = {
+            python: {
+                easy: [
+                    { question: "Какой оператор используется для вывода в Python?", options: ["print()", "output()", "echo()", "write()"], correct: 0 },
+                    { question: "Какой тип данных для целых чисел?", options: ["int", "float", "str", "bool"], correct: 0 },
+                    { question: "Как объявить переменную?", options: ["x = 5", "var x = 5", "let x = 5", "int x = 5"], correct: 0 },
+                    { question: "Какой символ для комментариев?", options: ["#", "//", "/*", "--"], correct: 0 },
+                    { question: "Как добавить элемент в список?", options: ["append()", "add()", "push()", "insert()"], correct: 0 },
+                    { question: "Что такое переменная?", options: ["Именованная область памяти", "Функция", "Цикл", "Оператор"], correct: 0 },
+                    { question: "Тип данных для дробных чисел?", options: ["float", "int", "double", "decimal"], correct: 0 },
+                    { question: "Как проверить тип переменной?", options: ["type()", "typeof()", "getType()", "check()"], correct: 0 },
+                    { question: "Что вернет 2 ** 3?", options: ["8", "6", "9", "5"], correct: 0 },
+                    { question: "Оператор сравнения 'равно'?", options: ["==", "=", "===", "!="], correct: 0 },
+                    { question: "Как создать список?", options: ["[]", "{}", "()", "<>"], correct: 0 },
+                    { question: "Что такое строка?", options: ["Последовательность символов", "Число", "Список", "Словарь"], correct: 0 },
+                    { question: "Длина строки функцией?", options: ["len()", "length()", "size()", "count()"], correct: 0 },
+                    { question: "Метод для верхнего регистра?", options: ["upper()", "toUpper()", "capitalize()", "up()"], correct: 0 },
+                    { question: "Что такое None?", options: ["Отсутствие значения", "Ноль", "Пустая строка", "Ложь"], correct: 0 },
+                    { question: "Как создать словарь?", options: ["{}", "[]", "()", "<>"], correct: 0 },
+                    { question: "Удаление элемента из списка?", options: ["remove()", "delete()", "pop()", "del()"], correct: 0 },
+                    { question: "Что вернет 10 // 3?", options: ["3", "3.33", "3.0", "Ошибку"], correct: 0 },
+                    { question: "Оператор возведения в степень?", options: ["**", "^", "pow()", "exp()"], correct: 0 },
+                    { question: "Булевый тип это?", options: ["True/False", "1/0", "Да/Нет", "Все ответы"], correct: 0 }
+                ],
+                medium: [
+                    { question: "Что вернет len([1, 2, 3])?", options: ["3", "2", "4", "Ошибку"], correct: 0 },
+                    { question: "Первый элемент списка?", options: ["list[0]", "list[1]", "list.first()", "list.get(0)"], correct: 0 },
+                    { question: "Цикл для перебора элементов?", options: ["for", "while", "foreach", "loop"], correct: 0 },
+                    { question: "Что такое словарь?", options: ["dict", "list", "tuple", "set"], correct: 0 },
+                    { question: "Как создать функцию?", options: ["def", "function", "func", "define"], correct: 0 },
+                    { question: "Глобальная переменная?", options: ["Доступна везде", "Внутри функции", "Внутри цикла", "Не существует"], correct: 0 },
+                    { question: "Вернуть значение из функции?", options: ["return", "back", "out", "result"], correct: 0 },
+                    { question: "Что такое рекурсия?", options: ["Функция вызывает себя", "Цикл", "Ошибка", "Тип данных"], correct: 0 },
+                    { question: "Обработка исключений?", options: ["try/except", "try/catch", "error/handle", "catch/throw"], correct: 0 },
+                    { question: "Что такое модуль?", options: ["Файл с кодом", "Функция", "Переменная", "Цикл"], correct: 0 },
+                    { question: "Импорт модуля?", options: ["import", "include", "using", "load"], correct: 0 },
+                    { question: "Что такое пакет?", options: ["Папка с модулями", "Библиотека", "Функция", "Класс"], correct: 0 },
+                    { question: "Создание класса?", options: ["class", "Class", "def class", "new class"], correct: 0 },
+                    { question: "Метод __init__?", options: ["Конструктор", "Деструктор", "Магический метод", "Обычный метод"], correct: 0 },
+                    { question: "Наследование это?", options: ["Класс получает свойства", "Копирование кода", "Создание класса", "Удаление класса"], correct: 0 },
+                    { question: "Полиморфизм это?", options: ["Разные формы метода", "Много классов", "Много объектов", "Много функций"], correct: 0 },
+                    { question: "Виртуальное окружение?", options: ["python -m venv", "virtual env", "py venv", "new env"], correct: 0 },
+                    { question: "Что такое pip?", options: ["Менеджер пакетов", "Команда Python", "Библиотека", "Фреймворк"], correct: 0 },
+                    { question: "Установка пакета pip?", options: ["pip install", "pip add", "pip get", "pip download"], correct: 0 },
+                    { question: "list comprehension?", options: ["Генератор списков", "Понимание списков", "Создание списка", "Все ответы"], correct: 0 }
+                ],
+                hard: [
+                    { question: "Что такое декоратор?", options: ["Функция-обёртка", "Тип данных", "Цикл", "Переменная"], correct: 0 },
+                    { question: "Что вернет [x*2 for x in range(5)]?", options: ["[0,2,4,6,8]", "[1,2,3,4,5]", "[0,1,2,3,4]", "Ошибку"], correct: 0 },
+                    { question: "Обработка исключений?", options: ["try/except", "try/catch", "catch/throw", "error/handle"], correct: 0 },
+                    { question: "Что такое генератор?", options: ["Функция с yield", "Тип данных", "Цикл", "Библиотека"], correct: 0 },
+                    { question: "Открытие файла?", options: ["open()", "file()", "read()", "load()"], correct: 0 },
+                    { question: "Менеджер контекста?", options: ["with open() as f", "context manager", "менеджер файлов", "все ответы"], correct: 0 },
+                    { question: "Что такое GIL?", options: ["Глобальная блокировка", "Библиотека", "Фреймворк", "Тип данных"], correct: 0 },
+                    { question: "Чем отличается is от ==?", options: ["is сравнивает объекты", "это одно и то же", "is для чисел", "== для строк"], correct: 0 },
+                    { question: "Что такое метакласс?", options: ["Класс для создания классов", "Второй класс", "Главный класс", "Абстрактный класс"], correct: 0 },
+                    { question: "Что такое дескриптор?", options: ["Атрибут с поведением", "Описание класса", "Документация", "Декоратор"], correct: 0 },
+                    { question: "Что такое __slots__?", options: ["Ограничение атрибутов", "Слоты памяти", "Методы класса", "Атрибуты"], correct: 0 },
+                    { question: "Что такое корутина?", options: ["Асинхронная функция", "Генератор", "Декоратор", "Класс"], correct: 0 },
+                    { question: "async/await это?", options: ["Асинхронность", "Циклы", "Условия", "Функции"], correct: 0 },
+                    { question: "asyncio это?", options: ["Библиотека асинхронности", "Синхронный код", "Цикл событий", "Фреймворк"], correct: 0 },
+                    { question: "Мультипроцессинг?", options: ["Несколько процессов", "Несколько потоков", "Много задач", "Много данных"], correct: 0 },
+                    { question: "Процесс vs поток?", options: ["Процессы изолированы", "Потоки изолированы", "Нет разницы", "Процесс - это поток"], correct: 0 },
+                    { question: "Что такое замыкание?", options: ["Внутренняя функция", "Закрытая функция", "Локальная функция", "Глобальная функция"], correct: 0 },
+                    { question: "functools.partial?", options: ["Частичное применение", "Часть функции", "Половина функции", "Кусок кода"], correct: 0 },
+                    { question: "Мемоизация это?", options: ["Кэширование", "Запоминание", "Оптимизация", "Все ответы"], correct: 0 },
+                    { question: "ABC в Python?", options: ["Абстрактные классы", "Алфавит", "Тип данных", "Модуль"], correct: 0 }
+                ]
+            },
+            math: {
+                easy: [
+                    { question: "2 + 2 = ?", options: ["4", "5", "6", "3"], correct: 0 },
+                    { question: "5 * 5 = ?", options: ["25", "10", "15", "20"], correct: 0 },
+                    { question: "Корень из 9?", options: ["3", "2", "4", "5"], correct: 0 },
+                    { question: "10 / 2 = ?", options: ["5", "4", "6", "3"], correct: 0 },
+                    { question: "7 - 3 = ?", options: ["4", "3", "5", "2"], correct: 0 },
+                    { question: "3 * 3 = ?", options: ["9", "6", "12", "8"], correct: 0 },
+                    { question: "8 + 2 = ?", options: ["10", "9", "11", "12"], correct: 0 },
+                    { question: "15 - 7 = ?", options: ["8", "7", "9", "6"], correct: 0 },
+                    { question: "20 / 4 = ?", options: ["5", "4", "6", "3"], correct: 0 },
+                    { question: "6 * 7 = ?", options: ["42", "36", "48", "40"], correct: 0 },
+                    { question: "Корень из 16?", options: ["4", "3", "5", "2"], correct: 0 },
+                    { question: "12 + 8 = ?", options: ["20", "18", "22", "16"], correct: 0 },
+                    { question: "9 * 9 = ?", options: ["81", "72", "64", "90"], correct: 0 },
+                    { question: "100 / 10 = ?", options: ["10", "5", "20", "15"], correct: 0 },
+                    { question: "30 - 12 = ?", options: ["18", "16", "20", "14"], correct: 0 },
+                    { question: "7 * 8 = ?", options: ["56", "54", "64", "48"], correct: 0 },
+                    { question: "Корень из 25?", options: ["5", "4", "6", "3"], correct: 0 },
+                    { question: "14 + 6 = ?", options: ["20", "18", "22", "16"], correct: 0 },
+                    { question: "45 / 5 = ?", options: ["9", "8", "7", "10"], correct: 0 },
+                    { question: "13 - 5 = ?", options: ["8", "7", "9", "6"], correct: 0 }
+                ],
+                medium: [
+                    { question: "Синус 30°?", options: ["0.5", "1", "0", "0.7"], correct: 0 },
+                    { question: "Производная x²?", options: ["2x", "x", "x²", "2"], correct: 0 },
+                    { question: "Интеграл cos x?", options: ["sin x", "-sin x", "cos x", "tg x"], correct: 0 },
+                    { question: "Число π?", options: ["3.14", "2.71", "1.61", "4.13"], correct: 0 },
+                    { question: "log₁₀(100)?", options: ["2", "1", "3", "4"], correct: 0 },
+                    { question: "Косинус 60°?", options: ["0.5", "1", "0", "0.7"], correct: 0 },
+                    { question: "Производная sin x?", options: ["cos x", "-cos x", "sin x", "-sin x"], correct: 0 },
+                    { question: "Интеграл e^x?", options: ["e^x", "ln x", "x e^x", "e^x + C"], correct: 0 },
+                    { question: "Число e?", options: ["2.71", "3.14", "1.61", "2.31"], correct: 0 },
+                    { question: "log₁₀(1000)?", options: ["3", "2", "4", "1"], correct: 0 },
+                    { question: "tg 45°?", options: ["1", "0", "∞", "0.5"], correct: 0 },
+                    { question: "Производная ln x?", options: ["1/x", "x", "e^x", "ln x"], correct: 0 },
+                    { question: "Интеграл 1/x?", options: ["ln|x|", "1/x²", "x", "e^x"], correct: 0 },
+                    { question: "arcsin 1?", options: ["π/2", "π", "0", "π/4"], correct: 0 },
+                    { question: "arccos 0?", options: ["π/2", "π", "0", "π/4"], correct: 0 },
+                    { question: "Производная tg x?", options: ["sec²x", "cosec²x", "1/cos²x", "все ответы"], correct: 3 },
+                    { question: "Интеграл sec²x?", options: ["tg x", "ctg x", "sec x", "cosec x"], correct: 0 },
+                    { question: "|-5| = ?", options: ["5", "-5", "0", "25"], correct: 0 },
+                    { question: "√25 = ?", options: ["5", "-5", "±5", "25"], correct: 0 },
+                    { question: "∛27 = ?", options: ["3", "9", "27", "3.5"], correct: 0 }
+                ],
+                hard: [
+                    { question: "lim sin(x)/x при x→0?", options: ["1", "0", "∞", "-1"], correct: 0 },
+                    { question: "Производная ln(x)?", options: ["1/x", "x", "e^x", "ln(x)"], correct: 0 },
+                    { question: "∫ 1/x dx?", options: ["ln|x| + C", "x", "e^x", "1/x²"], correct: 0 },
+                    { question: "i² = ?", options: ["-1", "1", "i", "-i"], correct: 0 },
+                    { question: "det(единичной 3x3)?", options: ["1", "0", "3", "9"], correct: 0 },
+                    { question: "lim (1 + 1/n)^n?", options: ["e", "1", "∞", "0"], correct: 0 },
+                    { question: "Производная a^x?", options: ["a^x ln a", "x a^(x-1)", "a^x", "a^(x-1)"], correct: 0 },
+                    { question: "∫ a^x dx?", options: ["a^x/ln a", "a^x ln a", "a^(x+1)/(x+1)", "a^x"], correct: 0 },
+                    { question: "arctg(∞)?", options: ["π/2", "π", "0", "π/4"], correct: 0 },
+                    { question: "arcctg(0)?", options: ["π/2", "π", "0", "π/4"], correct: 0 },
+                    { question: "Градиент функции?", options: ["Вектор производных", "Производная", "Интеграл", "Предел"], correct: 0 },
+                    { question: "Дивергенция?", options: ["Скалярное поле", "Векторное поле", "Производная", "Интеграл"], correct: 0 },
+                    { question: "Ротор поля?", options: ["Векторное поле", "Скалярное поле", "Производная", "Интеграл"], correct: 0 },
+                    { question: "Двойной интеграл от 1?", options: ["Площадь", "Объем", "Длина", "0"], correct: 0 },
+                    { question: "Тройной интеграл от 1?", options: ["Объем", "Площадь", "Длина", "0"], correct: 0 },
+                    { question: "Ряд Тейлора?", options: ["Разложение функции", "Сумма", "Произведение", "Предел"], correct: 0 },
+                    { question: "Ряд Фурье?", options: ["Разложение по синусам/косинусам", "Степенной ряд", "Экспонента", "Логарифм"], correct: 0 },
+                    { question: "Преобразование Лапласа?", options: ["Интегральное", "Дифференцирование", "Интегрирование", "Суммирование"], correct: 0 },
+                    { question: "Преобразование Фурье?", options: ["Интегральное", "Ряд", "Сумма", "Произведение"], correct: 0 },
+                    { question: "Дельта-функция Дирака?", options: ["Обобщенная", "Обычная", "Постоянная", "Ноль"], correct: 0 }
+                ]
+            },
+            history: {
+                easy: [
+                    { question: "Начало Второй мировой?", options: ["1939", "1941", "1914", "1945"], correct: 0 },
+                    { question: "Первый президент США?", options: ["Вашингтон", "Линкольн", "Джефферсон", "Рузвельт"], correct: 0 },
+                    { question: "Октябрьская революция?", options: ["1917", "1905", "1922", "1914"], correct: 0 },
+                    { question: "Автор 'Войны и мира'?", options: ["Толстой", "Достоевский", "Чехов", "Пушкин"], correct: 0 },
+                    { question: "Река в Древнем Египте?", options: ["Нил", "Евфрат", "Тигр", "Иордан"], correct: 0 },
+                    { question: "Конец Второй мировой?", options: ["1945", "1944", "1946", "1943"], correct: 0 },
+                    { question: "Первый император Рима?", options: ["Октавиан", "Юлий Цезарь", "Нерон", "Калигула"], correct: 0 },
+                    { question: "Куликовская битва?", options: ["1380", "1240", "1480", "1552"], correct: 0 },
+                    { question: "Основатель Москвы?", options: ["Долгорукий", "Калита", "Донской", "Невский"], correct: 0 },
+                    { question: "Крещение Руси?", options: ["988", "990", "980", "1000"], correct: 0 },
+                    { question: "Последний император России?", options: ["Николай II", "Александр III", "Петр I", "Иван Грозный"], correct: 0 },
+                    { question: "Падение Берлинской стены?", options: ["1989", "1991", "1985", "1995"], correct: 0 },
+                    { question: "Открытие Америки?", options: ["Колумб", "Магеллан", "Васко да Гама", "Кук"], correct: 0 },
+                    { question: "Первый полет в космос?", options: ["1961", "1957", "1965", "1970"], correct: 0 },
+                    { question: "Первый космонавт?", options: ["Гагарин", "Титов", "Леонов", "Терешкова"], correct: 0 },
+                    { question: "Отечественная война 1812?", options: ["1812", "1815", "1805", "1825"], correct: 0 },
+                    { question: "Полтавская битва?", options: ["1709", "1700", "1721", "1698"], correct: 0 },
+                    { question: "Первый Романов?", options: ["Михаил", "Алексей", "Петр", "Иван"], correct: 0 },
+                    { question: "Основание Петербурга?", options: ["1703", "1712", "1721", "1698"], correct: 0 },
+                    { question: "Автор 'Евгения Онегина'?", options: ["Пушкин", "Лермонтов", "Гоголь", "Тургенев"], correct: 0 }
+                ],
+                medium: [
+                    { question: "Год полета Гагарина?", options: ["1961", "1957", "1965", "1970"], correct: 0 },
+                    { question: "Последний император России?", options: ["Николай II", "Александр III", "Петр I", "Иван Грозный"], correct: 0 },
+                    { question: "Падение Берлинской стены?", options: ["1989", "1991", "1985", "1995"], correct: 0 },
+                    { question: "Открытие Америки?", options: ["Колумб", "Магеллан", "Васко да Гама", "Кук"], correct: 0 },
+                    { question: "Куликовская битва?", options: ["1380", "1240", "1480", "1552"], correct: 0 },
+                    { question: "Первый президент России?", options: ["Ельцин", "Путин", "Медведев", "Горбачев"], correct: 0 },
+                    { question: "Распад СССР?", options: ["1991", "1985", "1993", "1989"], correct: 0 },
+                    { question: "Карибский кризис?", options: ["1962", "1961", "1963", "1960"], correct: 0 },
+                    { question: "Война во Вьетнаме?", options: ["1955-1975", "1960-1970", "1950-1960", "1965-1975"], correct: 0 },
+                    { question: "Корейская война?", options: ["1950-1953", "1945-1950", "1955-1960", "1948-1952"], correct: 0 },
+                    { question: "Хиросима?", options: ["1945", "1944", "1946", "1943"], correct: 0 },
+                    { question: "Сталинградская битва?", options: ["1942-1943", "1941-1942", "1943-1944", "1940-1941"], correct: 0 },
+                    { question: "Курская дуга?", options: ["1943", "1942", "1944", "1941"], correct: 0 },
+                    { question: "Маршал Победы?", options: ["Жуков", "Рокоссовский", "Конев", "Василевский"], correct: 0 },
+                    { question: "Восстание декабристов?", options: ["1825", "1826", "1824", "1830"], correct: 0 },
+                    { question: "Крымская война?", options: ["1853-1856", "1850-1855", "1860-1865", "1848-1852"], correct: 0 },
+                    { question: "Русско-турецкая 1877-1878?", options: ["1877-1878", "1875-1876", "1880-1881", "1870-1871"], correct: 0 },
+                    { question: "Русско-японская война?", options: ["1904-1905", "1900-1901", "1910-1911", "1898-1899"], correct: 0 },
+                    { question: "Первая русская революция?", options: ["1905-1907", "1900-1903", "1910-1912", "1895-1898"], correct: 0 },
+                    { question: "Кровавое воскресенье?", options: ["9 января 1905", "9 января 1917", "9 января 1906", "9 января 1904"], correct: 0 }
+                ],
+                hard: [
+                    { question: "Первый князь Киевской Руси?", options: ["Рюрик", "Олег", "Игорь", "Святослав"], correct: 0 },
+                    { question: "Крещение Руси?", options: ["988", "990", "980", "1000"], correct: 0 },
+                    { question: "Автор 'Слова о полку Игореве'?", options: ["Неизвестен", "Мономах", "Невский", "Донской"], correct: 0 },
+                    { question: "Основание Петербурга?", options: ["1703", "1712", "1721", "1698"], correct: 0 },
+                    { question: "Правитель в 1812?", options: ["Александр I", "Николай I", "Павел I", "Александр II"], correct: 0 },
+                    { question: "Отмена крепостного права?", options: ["1861", "1864", "1855", "1881"], correct: 0 },
+                    { question: "Февральская революция?", options: ["1917", "1905", "1918", "1916"], correct: 0 },
+                    { question: "Октябрьская революция?", options: ["1917", "1918", "1919", "1920"], correct: 0 },
+                    { question: "Лидер большевиков в 1917?", options: ["Ленин", "Троцкий", "Сталин", "Свердлов"], correct: 0 },
+                    { question: "Гражданская война?", options: ["1918-1922", "1917-1921", "1919-1923", "1916-1920"], correct: 0 },
+                    { question: "Расстрел царской семьи?", options: ["1918", "1917", "1919", "1920"], correct: 0 },
+                    { question: "Место расстрела Николая II?", options: ["Екатеринбург", "Москва", "Петроград", "Тобольск"], correct: 0 },
+                    { question: "НЭП?", options: ["1921-1928", "1920-1925", "1922-1929", "1919-1926"], correct: 0 },
+                    { question: "Индустриализация?", options: ["1928", "1925", "1930", "1922"], correct: 0 },
+                    { question: "Коллективизация?", options: ["1929", "1928", "1930", "1927"], correct: 0 },
+                    { question: "Голодомор на Украине?", options: ["1932-1933", "1931-1932", "1933-1934", "1930-1931"], correct: 0 },
+                    { question: "Большой террор?", options: ["1937-1938", "1936-1937", "1938-1939", "1935-1936"], correct: 0 },
+                    { question: "Пакт Молотова-Риббентропа?", options: ["1939", "1938", "1940", "1937"], correct: 0 },
+                    { question: "Советско-финская война?", options: ["1939-1940", "1938-1939", "1940-1941", "1937-1938"], correct: 0 },
+                    { question: "Битва за Москву?", options: ["1941-1942", "1940-1941", "1942-1943", "1943-1944"], correct: 0 }
+                ]
+            },
+            physics: {
+                easy: [
+                    { question: "Единица силы?", options: ["Ньютон", "Джоуль", "Ватт", "Паскаль"], correct: 0 },
+                    { question: "Ускорение свободного падения?", options: ["9.8 м/с²", "10 м/с²", "9.8 км/ч²", "10 км/ч²"], correct: 0 },
+                    { question: "Закон F = ma?", options: ["Второй Ньютона", "Первый Ньютона", "Третий Ньютона", "Тяготения"], correct: 0 },
+                    { question: "Единица работы?", options: ["Джоуль", "Ньютон", "Ватт", "Паскаль"], correct: 0 },
+                    { question: "Единица мощности?", options: ["Ватт", "Джоуль", "Ньютон", "Паскаль"], correct: 0 },
+                    { question: "Единица сопротивления?", options: ["Ом", "Вольт", "Ампер", "Ватт"], correct: 0 },
+                    { question: "Единица напряжения?", options: ["Вольт", "Ампер", "Ом", "Ватт"], correct: 0 },
+                    { question: "Единица тока?", options: ["Ампер", "Вольт", "Ом", "Ватт"], correct: 0 },
+                    { question: "Скорость света?", options: ["3·10⁸ м/с", "3·10⁵ м/с", "3·10⁶ м/с", "3·10⁷ м/с"], correct: 0 },
+                    { question: "Гравитационная постоянная?", options: ["6.67·10⁻¹¹", "9.8", "6.67·10⁻¹⁰", "6.67·10⁻¹²"], correct: 0 },
+                    { question: "Самая длинная волна?", options: ["Красный", "Фиолетовый", "Синий", "Зеленый"], correct: 0 },
+                    { question: "Самая короткая волна?", options: ["Фиолетовый", "Красный", "Синий", "Зеленый"], correct: 0 },
+                    { question: "Что такое инерция?", options: ["Сохранение скорости", "Ускорение", "Торможение", "Движение"], correct: 0 },
+                    { question: "Что такое масса?", options: ["Мера инертности", "Вес", "Сила", "Объем"], correct: 0 },
+                    { question: "Что такое вес?", options: ["Сила тяжести", "Масса", "Объем", "Плотность"], correct: 0 },
+                    { question: "Что такое плотность?", options: ["Масса/объем", "Объем/масса", "Масса·объем", "Сила/объем"], correct: 0 },
+                    { question: "Единица давления?", options: ["Паскаль", "Ньютон", "Джоуль", "Ватт"], correct: 0 },
+                    { question: "Атмосферное давление?", options: ["101325 Па", "100000 Па", "98000 Па", "105000 Па"], correct: 0 },
+                    { question: "Что такое вакуум?", options: ["Отсутствие вещества", "Низкое давление", "Высокое давление", "Пустота"], correct: 0 },
+                    { question: "Что такое звук?", options: ["Механические волны", "Электромагнитные", "Частицы", "Энергия"], correct: 0 }
+                ],
+                medium: [
+                    { question: "1 Ньютон = ?", options: ["кг·м/с²", "кг/м²", "кг·м/с", "кг/с²"], correct: 0 },
+                    { question: "1 Джоуль = ?", options: ["Н·м", "Н/м", "кг·м/с", "Вт·с"], correct: 0 },
+                    { question: "1 Ватт = ?", options: ["Дж/с", "Н·м/с", "В·А", "Все ответы"], correct: 3 },
+                    { question: "Закон Ома?", options: ["I = U/R", "U = I·R", "R = U/I", "Все ответы"], correct: 3 },
+                    { question: "Последовательное соединение?", options: ["R = R₁ + R₂", "1/R = 1/R₁ + 1/R₂", "R = R₁·R₂/(R₁+R₂)", "R = R₁ - R₂"], correct: 0 },
+                    { question: "Параллельное соединение?", options: ["1/R = 1/R₁ + 1/R₂", "R = R₁ + R₂", "R = R₁·R₂", "R = R₁ - R₂"], correct: 0 },
+                    { question: "Что такое ЭДС?", options: ["Работа сторонних сил", "Напряжение", "Разность потенциалов", "Ток"], correct: 0 },
+                    { question: "Магнитное поле создается?", options: ["Током", "Зарядом", "Магнитом", "Все ответы"], correct: 3 },
+                    { question: "Правило буравчика для?", options: ["Направления поля", "Тока", "Силы", "Напряжения"], correct: 0 },
+                    { question: "Индукция магнитного поля?", options: ["Силовая характеристика", "Энергия", "Мощность", "Работа"], correct: 0 },
+                    { question: "Единица магнитной индукции?", options: ["Тесла", "Вебер", "Гаусс", "Эрстед"], correct: 0 },
+                    { question: "Магнитный поток?", options: ["B·S", "B/S", "B+S", "B-S"], correct: 0 },
+                    { question: "Единица магнитного потока?", options: ["Вебер", "Тесла", "Генри", "Фарад"], correct: 0 },
+                    { question: "Закон Фарадея?", options: ["ε = -dΦ/dt", "ε = dΦ/dt", "ε = Φ·t", "ε = Φ/t"], correct: 0 },
+                    { question: "Что такое самоиндукция?", options: ["Индукция в том же контуре", "Взаимная", "Индукция", "ЭДС"], correct: 0 },
+                    { question: "Единица индуктивности?", options: ["Генри", "Фарад", "Тесла", "Вебер"], correct: 0 },
+                    { question: "Частота тока в России?", options: ["50 Гц", "60 Гц", "100 Гц", "220 Гц"], correct: 0 },
+                    { question: "Напряжение в розетке?", options: ["220 В", "110 В", "380 В", "127 В"], correct: 0 },
+                    { question: "Действующее значение тока?", options: ["Среднеквадратичное", "Максимальное", "Минимальное", "Среднее"], correct: 0 },
+                    { question: "Колебательный контур?", options: ["LC", "RC", "RL", "RLC"], correct: 0 }
+                ],
+                hard: [
+                    { question: "Что такое энтропия?", options: ["Мера беспорядка", "Энергия", "Температура", "Тепло"], correct: 0 },
+                    { question: "Второе начало термодинамики?", options: ["Энтропия растет", "Энергия сохраняется", "T=const", "P=const"], correct: 0 },
+                    { question: "Абсолютный ноль?", options: ["-273°C", "0°C", "-273K", "0K"], correct: 0 },
+                    { question: "0 К в °C?", options: ["-273°C", "0°C", "273°C", "-100°C"], correct: 0 },
+                    { question: "Уравнение идеального газа?", options: ["PV = νRT", "PV = const", "P/T = const", "V/T = const"], correct: 0 },
+                    { question: "Газовая постоянная R?", options: ["8.31", "1.38·10⁻²³", "6.02·10²³", "3.14"], correct: 0 },
+                    { question: "Постоянная Больцмана?", options: ["1.38·10⁻²³", "8.31", "6.02·10²³", "3.14"], correct: 0 },
+                    { question: "Число Авогадро?", options: ["6.02·10²³", "1.38·10⁻²³", "8.31", "3.14"], correct: 0 },
+                    { question: "Первый закон термодинамики?", options: ["ΔU = Q - A", "Q = ΔU + A", "A = Q - ΔU", "Все ответы"], correct: 3 },
+                    { question: "Теплоемкость?", options: ["C = Q/ΔT", "C = Q·ΔT", "C = ΔT/Q", "C = Q + ΔT"], correct: 0 },
+                    { question: "Адиабатный процесс?", options: ["Q = 0", "T = const", "P = const", "V = const"], correct: 0 },
+                    { question: "Изотермический процесс?", options: ["T = const", "P = const", "V = const", "Q = 0"], correct: 0 },
+                    { question: "Изобарный процесс?", options: ["P = const", "T = const", "V = const", "Q = 0"], correct: 0 },
+                    { question: "Изохорный процесс?", options: ["V = const", "P = const", "T = const", "Q = 0"], correct: 0 },
+                    { question: "КПД тепловой машины?", options: ["η = (Q₁-Q₂)/Q₁", "η = Q₁/Q₂", "η = Q₂/Q₁", "η = Q₁+Q₂"], correct: 0 },
+                    { question: "Цикл Карно?", options: ["Два изотермических и два адиабатных", "Два изобарных", "Два изохорных", "Все ответы"], correct: 0 },
+                    { question: "Теорема Карно?", options: ["Макс КПД не зависит от рабочего тела", "КПД = 1", "КПД = 0", "КПД зависит от вещества"], correct: 0 },
+                    { question: "Уравнение Ван-дер-Ваальса?", options: ["Учитывает объем молекул", "Идеальный газ", "Реальный газ", "Все ответы"], correct: 0 },
+                    { question: "Критическая температура?", options: ["Выше газ не сжижается", "Температура кипения", "Температура плавления", "Тройная точка"], correct: 0 },
+                    { question: "Тройная точка воды?", options: ["0.01°C", "0°C", "100°C", "-273°C"], correct: 0 }
+                ]
+            }
+        };
+
+        // Инициализация тестовых данных
+        function initTestData() {
+            if (db.users.length === 0) {
+                db.users.push(
+                    { id: 1, username: 'admin', password: btoa('123'), role: 'admin', fullName: 'Администратор', createdAt: new Date().toISOString() },
+                    { id: 2, username: 'teacher', password: btoa('123'), role: 'teacher', fullName: 'Иван Петров', createdAt: new Date().toISOString() },
+                    { id: 3, username: 'student', password: btoa('123'), role: 'student', fullName: 'Анна Сидорова', createdAt: new Date().toISOString() }
+                );
+            }
+            saveToStorage();
+        }
+        
+        initTestData();
+
+        function saveToStorage() {
+            localStorage.setItem('users', JSON.stringify(db.users));
+            localStorage.setItem('courses', JSON.stringify(db.courses));
+            localStorage.setItem('assignments', JSON.stringify(db.assignments));
+            localStorage.setItem('submissions', JSON.stringify(db.submissions));
+            localStorage.setItem('enrollments', JSON.stringify(db.enrollments));
+            localStorage.setItem('grades', JSON.stringify(db.grades));
+            localStorage.setItem('testResults', JSON.stringify(db.testResults));
+            localStorage.setItem('currentUser', JSON.stringify(db.currentUser));
+        }
+
+        // Генерация тестовых вопросов
+        function generateTestQuestions(courseId) {
+            const course = db.courses.find(c => c.id === courseId);
+            if (!course || course.type !== 'test') return;
+            
+            const topic = course.topic || 'python';
+            const difficulty = course.difficulty || 'medium';
+            const count = course.questionCount || 10;
+            
+            const templates = questionTemplates[topic] || questionTemplates.python;
+            const questions = templates[difficulty] || templates.medium;
+            
+            // Перемешиваем и берем нужное количество
+            const shuffled = [...questions].sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, Math.min(count, shuffled.length));
+            
+            course.questions = selected.map((q, index) => ({
+                id: index + 1,
+                ...q
+            }));
+            
+            saveToStorage();
+        }
+
+        // Показать/скрыть настройки теста
+        document.getElementById('courseType').addEventListener('change', function(e) {
+            const testSettings = document.getElementById('testSettings');
+            testSettings.style.display = e.target.value === 'test' ? 'block' : 'none';
+        });
+
+        window.onload = function() {
+            if (db.currentUser) updateUI();
+            window.addEventListener('beforeunload', function() {});
+        };
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function updateUI() {
+            if (db.currentUser) {
+                document.getElementById('tabAuth').style.display = 'none';
+                document.getElementById('auth').classList.remove('active');
+                document.getElementById('userInfo').style.display = 'flex';
+                document.getElementById('userName').textContent = db.currentUser.fullName || db.currentUser.username;
+                document.getElementById('userRole').textContent = getRoleName(db.currentUser.role);
+                document.getElementById('userRole').className = `role-badge role-${db.currentUser.role}`;
+                
+                document.getElementById('tabCourses').style.display = 'block';
+                document.getElementById('tabProfile').style.display = 'block';
+                
+                document.getElementById('tabGrades').style.display = db.currentUser.role === 'student' ? 'block' : 'none';
+                document.getElementById('tabAdmin').style.display = db.currentUser.role === 'admin' ? 'block' : 'none';
+                document.getElementById('teacherControls').style.display = (db.currentUser.role === 'teacher' || db.currentUser.role === 'admin') ? 'block' : 'none';
+                
+                if (db.currentUser.role === 'admin') {
+                    document.getElementById('adminControls').style.display = 'block';
+                    loadAdminPanel();
+                } else {
+                    document.getElementById('adminControls').style.display = 'none';
+                }
+                
+                loadCourses();
+                loadGrades();
+                loadProfile();
+                showTab('courses');
+            } else {
+                document.getElementById('tabAuth').style.display = 'block';
+                document.getElementById('userInfo').style.display = 'none';
+                document.getElementById('tabCourses').style.display = 'none';
+                document.getElementById('tabGrades').style.display = 'none';
+                document.getElementById('tabProfile').style.display = 'none';
+                document.getElementById('tabAdmin').style.display = 'none';
+                showTab('auth');
+            }
+        }
+
+        function getRoleName(role) {
+            return { student: 'Студент', teacher: 'Преподаватель', admin: 'Администратор' }[role] || role;
+        }
+
+        function handleAuth() {
+            const username = document.getElementById('authUsername').value;
+            const password = document.getElementById('authPassword').value;
+            const action = document.getElementById('authAction').value;
+            
+            if (!username || !password) {
+                showNotification('Заполните все поля', 'error');
+                return;
+            }
+            
+            if (action === 'login') {
+                login(username, password);
+            } else {
+                const role = document.getElementById('registerRole').value;
+                register(username, password, role);
+            }
+        }
+
+        function login(username, password) {
+            const user = db.users.find(u => u.username === username && u.password === btoa(password));
+            if (user) {
+                db.currentUser = user;
+                saveToStorage();
+                showNotification(`Добро пожаловать, ${user.fullName || user.username}!`);
+                updateUI();
+            } else {
+                showNotification('Неверное имя или пароль', 'error');
+            }
+        }
+
+        function register(username, password, role) {
+            if (db.users.find(u => u.username === username)) {
+                showNotification('Пользователь уже существует', 'error');
+                return;
+            }
+            
+            db.users.push({
+                id: Date.now(),
+                username,
+                password: btoa(password),
+                role,
+                fullName: username,
+                createdAt: new Date().toISOString()
+            });
+            
+            saveToStorage();
+            showNotification('Регистрация успешна! Теперь войдите.');
+            document.getElementById('authUsername').value = '';
+            document.getElementById('authPassword').value = '';
+        }
+
+        function logout() {
+            db.currentUser = null;
+            saveToStorage();
+            showNotification('Вы вышли из системы');
+            updateUI();
+        }
+
+        function showCreateCourseModal() {
+            document.getElementById('createCourseModal').classList.add('active');
+            document.getElementById('testSettings').style.display = 'none';
+        }
+
+        function createCourse() {
+            if (!db.currentUser || (db.currentUser.role !== 'teacher' && db.currentUser.role !== 'admin')) {
+                showNotification('Только преподаватели и администраторы могут создавать курсы', 'error');
+                return;
+            }
+            
+            const type = document.getElementById('courseType').value;
+            const name = document.getElementById('courseName').value;
+            const code = document.getElementById('courseCode').value;
+            const description = document.getElementById('courseDescription').value;
+            
+            if (!name || !code) {
+                showNotification('Заполните название и код курса', 'error');
+                return;
+            }
+            
+            if (db.courses.find(c => c.code === code)) {
+                showNotification('Курс с таким кодом уже существует', 'error');
+                return;
+            }
+            
+            const newCourse = {
+                id: Date.now(),
+                name,
+                code,
+                description,
+                teacherId: db.currentUser.id,
+                teacherName: db.currentUser.fullName || db.currentUser.username,
+                type,
+                createdAt: new Date().toISOString()
+            };
+            
+            if (type === 'test') {
+                const topicInput = document.getElementById('testTopic').value;
+                newCourse.topic = topicInput;
+                newCourse.difficulty = document.getElementById('difficulty').value;
+                newCourse.questionCount = parseInt(document.getElementById('questionCount').value);
+                
+                db.courses.push(newCourse);
+                saveToStorage();
+                generateTestQuestions(newCourse.id);
+            } else {
+                db.courses.push(newCourse);
+                saveToStorage();
+            }
+            
+            document.getElementById('courseName').value = '';
+            document.getElementById('courseCode').value = '';
+            document.getElementById('courseDescription').value = '';
+            closeModal('createCourseModal');
+            
+            showNotification('Курс успешно создан!');
+            loadCourses();
+        }
+
+        function showTakeTestModal(courseId) {
+            const course = db.courses.find(c => c.id === courseId);
+            if (!course || !course.questions) {
+                showNotification('Ошибка: вопросы теста не найдены', 'error');
+                return;
+            }
+            
+            const modal = document.getElementById('takeTestModal');
+            const form = document.getElementById('testForm');
+            
+            let html = `<h3>${course.name}</h3>`;
+            html += `<p>${course.description}</p>`;
+            html += `<p>Количество вопросов: <strong>${course.questions.length}</strong></p>`;
+            
+            course.questions.forEach((q, index) => {
+                html += `
+                    <div class="test-question">
+                        <div class="question-number">Вопрос ${index + 1}:</div>
+                        <h5>${q.question}</h5>
+                `;
+                
+                q.options.forEach((option, optIndex) => {
+                    html += `
+                        <div class="test-option">
+                            <input type="radio" name="q${q.id}" value="${optIndex}" id="q${q.id}o${optIndex}">
+                            <label for="q${q.id}o${optIndex}">${option}</label>
+                        </div>
+                    `;
+                });
+                
+                html += `</div>`;
+            });
+            
+            html += `
+                <div class="modal-footer">
+                    <button class="btn btn-success" onclick="submitTest(${courseId})">Завершить тест</button>
+                    <button class="btn btn-danger" onclick="closeModal('takeTestModal')">Отмена</button>
+                </div>
+            `;
+            
+            form.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        function submitTest(courseId) {
+            const course = db.courses.find(c => c.id === courseId);
+            if (!course || !course.questions) return;
+            
+            let correct = 0;
+            const total = course.questions.length;
+            
+            course.questions.forEach(q => {
+                const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
+                const answer = selected ? parseInt(selected.value) : -1;
+                if (answer === q.correct) correct++;
+            });
+            
+            const score = Math.round((correct / total) * 100);
+            
+            const testResult = {
+                id: Date.now(),
+                courseId,
+                studentId: db.currentUser.id,
+                studentName: db.currentUser.fullName || db.currentUser.username,
+                score,
+                correct,
+                total,
+                completedAt: new Date().toISOString()
+            };
+            
+            db.testResults.push(testResult);
+            
+            db.grades.push({
+                id: Date.now(),
+                courseId,
+                studentId: db.currentUser.id,
+                score: score,
+                teacherId: course.teacherId,
+                date: new Date().toISOString(),
+                type: 'test'
+            });
+            
+            saveToStorage();
+            
+            const form = document.getElementById('testForm');
+            form.innerHTML = `
+                <div class="test-result">
+                    <h3>Тест завершён!</h3>
+                    <div class="test-score">${score}%</div>
+                    <p>Правильных ответов: ${correct} из ${total}</p>
+                    <button class="btn btn-primary" onclick="closeModal('takeTestModal')">Закрыть</button>
+                </div>
+            `;
+            
+            showNotification(`Тест завершён! Результат: ${score}%`);
+            loadCourses();
+        }
+
+        function loadCourses() {
+            const coursesList = document.getElementById('coursesList');
+            if (!db.currentUser) return;
+            
+            let courses = db.currentUser.role === 'admin' ? db.courses :
+                         db.currentUser.role === 'teacher' ? db.courses.filter(c => c.teacherId === db.currentUser.id) :
+                         db.courses;
+            
+            if (courses.length === 0) {
+                coursesList.innerHTML = '<p style="text-align: center; color: #666;">Нет доступных курсов</p>';
+                return;
+            }
+            
+            coursesList.innerHTML = courses.map(course => {
+                const enrolledCount = db.enrollments.filter(e => e.courseId === course.id).length;
+                const isEnrolled = db.enrollments.some(e => e.courseId === course.id && e.studentId === db.currentUser?.id);
+                const testResult = db.testResults?.find(r => r.courseId === course.id && r.studentId === db.currentUser?.id);
+                
+                const typeBadge = course.type === 'test' ? 
+                    '<span class="course-type-badge type-test">📝 Тест</span>' : 
+                    '<span class="course-type-badge type-regular">📚 Обычный курс</span>';
+                
+                return `
+                    <div class="course-card">
+                        <h3>${course.name}</h3>
+                        ${typeBadge}
+                        <div class="code">📌 Код: ${course.code}</div>
+                        <div class="teacher">👨‍🏫 Преподаватель: ${course.teacherName}</div>
+                        <p>${course.description || 'Нет описания'}</p>
+                        <div class="stats">
+                            <div class="stat-item">
+                                <div class="stat-value">${enrolledCount}</div>
+                                <div class="stat-label">студентов</div>
+                            </div>
+                            ${course.type === 'test' && course.questions ? `
+                            <div class="stat-item">
+                                <div class="stat-value">${course.questions.length}</div>
+                                <div class="stat-label">вопросов</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                        
+                        ${db.currentUser.role === 'student' && !isEnrolled && course.type !== 'test' ? 
+                            `<button class="btn btn-success" onclick="enrollCourse(${course.id})">📝 Записаться</button>` : ''
+                        }
+                        ${db.currentUser.role === 'student' && course.type === 'test' && !testResult ? 
+                            `<button class="btn btn-warning" onclick="showTakeTestModal(${course.id})" style="background: #ff9800; color: white;">📝 Пройти тест (${course.questions?.length || 0} вопросов)</button>` : ''
+                        }
+                        ${db.currentUser.role === 'student' && testResult ? 
+                            `<div style="text-align: center; margin: 10px 0;">
+                                <span style="color: #4caf50;">✅ Тест пройден</span>
+                                <br><small>Результат: ${testResult.score}% (${testResult.correct}/${testResult.total})</small>
+                             </div>` : ''
+                        }
+                        ${db.currentUser.role === 'teacher' && course.teacherId === db.currentUser.id ? 
+                            `<button class="btn btn-primary" onclick="showCourseStats(${course.id})">📊 Статистика</button>` : ''
+                        }
+                        ${db.currentUser.role === 'admin' ? 
+                            `<button class="btn btn-danger" onclick="deleteCourse(${course.id})">🗑️ Удалить</button>` : ''
+                        }
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function enrollCourse(courseId) {
+            if (!db.currentUser || db.currentUser.role !== 'student') {
+                showNotification('Только студенты могут записываться на курсы', 'error');
+                return;
+            }
+            
+            if (db.enrollments.some(e => e.courseId === courseId && e.studentId === db.currentUser.id)) {
+                showNotification('Вы уже записаны на этот курс', 'error');
+                return;
+            }
+            
+            db.enrollments.push({
+                id: Date.now(),
+                courseId,
+                studentId: db.currentUser.id,
+                studentName: db.currentUser.fullName || db.currentUser.username,
+                enrolledAt: new Date().toISOString()
+            });
+            
+            saveToStorage();
+            showNotification('✅ Вы успешно записаны на курс!');
+            loadCourses();
+        }
+
+        function loadGrades() {
+            const gradesList = document.getElementById('gradesList');
+            if (!db.currentUser || db.currentUser.role !== 'student') {
+                gradesList.innerHTML = '<p style="text-align: center; color: #666;">Доступно только для студентов</p>';
+                return;
+            }
+            
+            const grades = db.grades.filter(g => g.studentId === db.currentUser.id);
+            const testResults = db.testResults?.filter(r => r.studentId === db.currentUser.id) || [];
+            
+            if (grades.length === 0 && testResults.length === 0) {
+                gradesList.innerHTML = '<p style="text-align: center; color: #666;">У вас пока нет оценок</p>';
+                return;
+            }
+            
+            let html = '<table class="grade-table"><thead><tr><th>Курс</th><th>Тип</th><th>Результат</th><th>Дата</th></tr></thead><tbody>';
+            
+            testResults.forEach(r => {
+                const course = db.courses.find(c => c.id === r.courseId);
+                html += `<tr><td>${course ? course.name : 'Тест'}</td><td>📝 Тест</td><td><strong>${r.score}%</strong> (${r.correct}/${r.total})</td><td>${new Date(r.completedAt).toLocaleDateString()}</td></tr>`;
+            });
+            
+            grades.forEach(g => {
+                if (g.type !== 'test') {
+                    const course = db.courses.find(c => c.id === g.courseId);
+                    html += `<tr><td>${course ? course.name : 'Курс'}</td><td>📚 Задание</td><td><strong>${g.score}</strong></td><td>${new Date(g.date).toLocaleDateString()}</td></tr>`;
+                }
+            });
+            
+            html += '</tbody></table>';
+            gradesList.innerHTML = html;
+        }
+
+        function loadProfile() {
+            if (!db.currentUser) return;
+            
+            const profileInfo = document.getElementById('profileInfo');
+            const enrolledCount = db.enrollments.filter(e => e.studentId === db.currentUser.id).length;
+            const testCount = db.testResults?.filter(r => r.studentId === db.currentUser.id).length || 0;
+            const gradeCount = db.grades.filter(g => g.studentId === db.currentUser.id).length;
+            
+            profileInfo.innerHTML = `
+                <p><strong>Имя:</strong> ${db.currentUser.fullName || db.currentUser.username}</p>
+                <p><strong>Роль:</strong> ${getRoleName(db.currentUser.role)}</p>
+                <p><strong>Дата регистрации:</strong> ${new Date(db.currentUser.createdAt).toLocaleDateString()}</p>
+                ${db.currentUser.role === 'student' ? `
+                    <p><strong>Курсов:</strong> ${enrolledCount}</p>
+                    <p><strong>Пройдено тестов:</strong> ${testCount}</p>
+                    <p><strong>Оценок:</strong> ${gradeCount}</p>
+                ` : ''}
+                ${db.currentUser.role === 'teacher' ? `
+                    <p><strong>Создано курсов:</strong> ${db.courses.filter(c => c.teacherId === db.currentUser.id).length}</p>
+                ` : ''}
+            `;
+        }
+
+        function loadAdminPanel() {
+            if (!db.currentUser || db.currentUser.role !== 'admin') return;
+            
+            document.getElementById('systemStats').innerHTML = `
+                <p>👥 Пользователей: ${db.users.length}</p>
+                <p>📚 Курсов: ${db.courses.length}</p>
+                <p>📝 Тестов: ${db.courses.filter(c => c.type === 'test').length}</p>
+                <p>📊 Оценок: ${db.grades.length}</p>
+            `;
+            
+            document.getElementById('usersList').innerHTML = db.users.map(user => `
+                <div class="user-item">
+                    <div><strong>${user.fullName || user.username}</strong> (${user.username}) <span class="role-badge role-${user.role}">${getRoleName(user.role)}</span></div>
+                    <div><button class="btn btn-danger" onclick="deleteUser(${user.id})">🗑️</button></div>
+                </div>
+            `).join('');
+        }
+
+        function showAddUserModal() {
+            document.getElementById('addUserModal').classList.add('active');
+        }
+
+        function addUser() {
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newPassword').value;
+            const role = document.getElementById('newRole').value;
+            
+            if (!username || !password) {
+                showNotification('Заполните все поля', 'error');
+                return;
+            }
+            
+            if (db.users.find(u => u.username === username)) {
+                showNotification('Пользователь уже существует', 'error');
+                return;
+            }
+            
+            db.users.push({
+                id: Date.now(),
+                username,
+                password: btoa(password),
+                role,
+                fullName: username,
+                createdAt: new Date().toISOString()
+            });
+            
+            saveToStorage();
+            closeModal('addUserModal');
+            showNotification('Пользователь добавлен');
+            loadAdminPanel();
+        }
+
+        function deleteUser(userId) {
+            if (userId === db.currentUser?.id) {
+                showNotification('Нельзя удалить себя', 'error');
+                return;
+            }
+            if (confirm('Удалить пользователя?')) {
+                db.users = db.users.filter(u => u.id !== userId);
+                saveToStorage();
+                showNotification('Пользователь удален');
+                loadAdminPanel();
+            }
+        }
+
+        function deleteCourse(courseId) {
+            if (confirm('Удалить курс? Это действие нельзя отменить.')) {
+                db.courses = db.courses.filter(c => c.id !== courseId);
+                db.enrollments = db.enrollments.filter(e => e.courseId !== courseId);
+                db.grades = db.grades.filter(g => g.courseId !== courseId);
+                db.testResults = db.testResults?.filter(r => r.courseId !== courseId) || [];
+                saveToStorage();
+                showNotification('Курс удален');
+                loadCourses();
+                if (db.currentUser?.role === 'admin') loadAdminPanel();
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function showAllCourses() { loadCourses(); }
+        function showPendingCourses() { showNotification('Функция в разработке'); }
+
+        updateUI();
+    </script>
+</body>
+</html>
