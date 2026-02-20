@@ -771,10 +771,10 @@
             document.getElementById('createCourseModal').classList.add('active');
         }
 
-        // Создание курса (только преподаватель и админ)
+        // Создание курса
         function createCourse() {
             if (!db.currentUser || (db.currentUser.role !== 'teacher' && db.currentUser.role !== 'admin')) {
-                showNotification('Только преподаватели могут создавать курсы', 'error');
+                showNotification('Только преподаватели и администраторы могут создавать курсы', 'error');
                 return;
             }
             
@@ -816,7 +816,7 @@
             loadCourses();
         }
 
-        // Загрузка курсов
+        // Загрузка курсов - ИСПРАВЛЕНО: студенты видят ВСЕ курсы
         function loadCourses() {
             const coursesList = document.getElementById('coursesList');
             
@@ -831,11 +831,8 @@
                 // Преподаватель видит свои курсы
                 courses = db.courses.filter(c => c.teacherId === db.currentUser.id);
             } else {
-                // Студент видит курсы, на которые записан
-                const enrolledIds = db.enrollments
-                    .filter(e => e.studentId === db.currentUser.id)
-                    .map(e => e.courseId);
-                courses = db.courses.filter(c => enrolledIds.includes(c.id));
+                // СТУДЕНТ видит ВСЕ курсы (не только те, на которые записан)
+                courses = db.courses;
             }
             
             if (courses.length === 0) {
@@ -864,16 +861,16 @@
                             </div>
                         </div>
                         ${db.currentUser.role === 'student' && !isEnrolled ? 
-                            `<button class="btn btn-success" onclick="enrollCourse(${course.id})">📝 Записаться</button>` : 
+                            `<button class="btn btn-success" onclick="enrollCourse(${course.id})">📝 Записаться на курс</button>` : 
                             ''}
                         ${db.currentUser.role === 'student' && isEnrolled ? 
-                            `<span style="color: #4caf50;">✅ Вы записаны</span>` : 
+                            `<span style="color: #4caf50; display: block; text-align: center;">✅ Вы записаны на этот курс</span>` : 
                             ''}
                         ${db.currentUser.role === 'teacher' && course.teacherId === db.currentUser.id ? 
                             `<button class="btn btn-primary" onclick="showGradeModal(${course.id})">⭐ Выставить оценки</button>` : 
                             ''}
                         ${db.currentUser.role === 'admin' ? 
-                            `<button class="btn btn-danger" onclick="deleteCourse(${course.id})">🗑️ Удалить</button>` : 
+                            `<button class="btn btn-danger" onclick="deleteCourse(${course.id})">🗑️ Удалить курс</button>` : 
                             ''}
                     </div>
                 `;
@@ -901,11 +898,11 @@
             });
             
             saveToStorage();
-            showNotification('Вы успешно записаны на курс!');
+            showNotification('✅ Вы успешно записаны на курс!');
             loadCourses();
         }
 
-        // Загрузка оценок (ТОЛЬКО ДЛЯ СТУДЕНТОВ)
+        // Загрузка оценок
         function loadGrades() {
             const gradesList = document.getElementById('gradesList');
             
@@ -960,6 +957,9 @@
             
             const profileInfo = document.getElementById('profileInfo');
             
+            const enrolledCourses = db.enrollments.filter(e => e.studentId === db.currentUser.id).length;
+            const studentGrades = db.grades.filter(g => g.studentId === db.currentUser.id).length;
+            
             profileInfo.innerHTML = `
                 <p><strong>Имя пользователя:</strong> ${db.currentUser.username}</p>
                 <p><strong>Полное имя:</strong> ${db.currentUser.fullName || db.currentUser.username}</p>
@@ -967,8 +967,8 @@
                 <p><strong>Дата регистрации:</strong> ${new Date(db.currentUser.createdAt).toLocaleDateString()}</p>
                 <p><strong>ID:</strong> ${db.currentUser.id}</p>
                 ${db.currentUser.role === 'student' ? `
-                    <p><strong>Курсов:</strong> ${db.enrollments.filter(e => e.studentId === db.currentUser.id).length}</p>
-                    <p><strong>Оценок:</strong> ${db.grades.filter(g => g.studentId === db.currentUser.id).length}</p>
+                    <p><strong>Курсов:</strong> ${enrolledCourses}</p>
+                    <p><strong>Оценок:</strong> ${studentGrades}</p>
                 ` : ''}
             `;
         }
@@ -1011,7 +1011,7 @@
                         <div class="code">${course.code}</div>
                         <div class="teacher">Преподаватель: ${teacher ? teacher.fullName || teacher.username : 'Неизвестно'}</div>
                         <p>${course.description}</p>
-                        <button class="btn btn-danger" onclick="deleteCourse(${course.id})">Удалить курс</button>
+                        <button class="btn btn-danger" onclick="deleteCourse(${course.id})">🗑️ Удалить курс</button>
                     </div>
                 `;
             }).join('');
