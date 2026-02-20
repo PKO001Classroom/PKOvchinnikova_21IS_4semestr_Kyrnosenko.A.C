@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EduGrader Автономная версия</title>
+    <style>
+        body { font-family: Arial; padding: 20px; max-width: 800px; margin: 0 auto; background: #f0f2f5; }
+        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .tab { padding: 10px 20px; cursor: pointer; background: #f5f5f5; border: 1px solid #ddd; margin-right: 5px; border-radius: 5px; display: inline-block; }
+        .tab.active { background: #1a73e8; color: white; }
+        .tab-content { display: none; padding: 20px; }
+        .tab-content.active { display: block; }
+        input, select, textarea, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { background: #1a73e8; color: white; border: none; cursor: pointer; font-size: 16px; }
+        button:hover { background: #1557b0; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 8px; overflow: auto; }
+        .course-card { background: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #1a73e8; }
+        .notification { background: #e7f3ff; padding: 10px; margin: 5px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 EduGrader - Автономная версия</h1>
+        <p>✅ Работает без сервера! Все данные хранятся в вашем браузере.</p>
+        
+        <div>
+            <span class="tab active" onclick="showTab('auth')">🔐 Вход/Регистрация</span>
+            <span class="tab" onclick="showTab('courses')">📚 Курсы</span>
+            <span class="tab" onclick="showTab('grades')">📊 Оценки</span>
+            <span class="tab" onclick="showTab('profile')">👤 Профиль</span>
+        </div>
+
+        <!-- Вкладка авторизации -->
+        <div id="auth" class="tab-content active">
+            <h3>🔐 Регистрация / Вход</h3>
+            <input type="text" id="username" placeholder="Имя пользователя">
+            <input type="password" id="password" placeholder="Пароль">
+            <select id="role">
+                <option value="student">Студент</option>
+                <option value="teacher">Преподаватель</option>
+            </select>
+            <button onclick="register()">Зарегистрироваться</button>
+            <button onclick="login()">Войти</button>
+            
+            <div id="current-user"></div>
+        </div>
+
+        <!-- Вкладка курсов -->
+        <div id="courses" class="tab-content">
+            <h3>📚 Мои курсы</h3>
+            <button onclick="showAddCourse()">➕ Добавить курс</button>
+            <div id="course-list"></div>
+            
+            <div id="add-course-form" style="display: none;">
+                <h4>Новый курс</h4>
+                <input type="text" id="course-name" placeholder="Название курса">
+                <input type="text" id="course-code" placeholder="Код курса">
+                <textarea id="course-desc" placeholder="Описание"></textarea>
+                <button onclick="addCourse()">Сохранить</button>
+                <button onclick="cancelAddCourse()">Отмена</button>
+            </div>
+        </div>
+
+        <!-- Вкладка оценок -->
+        <div id="grades" class="tab-content">
+            <h3>📊 Мои оценки</h3>
+            <div id="grades-list"></div>
+        </div>
+
+        <!-- Вкладка профиля -->
+        <div id="profile" class="tab-content">
+            <h3>👤 Профиль</h3>
+            <div id="profile-info"></div>
+            <button onclick="logout()">Выйти</button>
+        </div>
+
+        <!-- Результаты -->
+        <div class="notification" id="result"></div>
+    </div>
+
+    <script>
+        // Инициализация данных
+        let db = {
+            users: JSON.parse(localStorage.getItem('users')) || [],
+            courses: JSON.parse(localStorage.getItem('courses')) || [],
+            enrollments: JSON.parse(localStorage.getItem('enrollments')) || [],
+            grades: JSON.parse(localStorage.getItem('grades')) || [],
+            currentUser: JSON.parse(localStorage.getItem('currentUser')) || null
+        };
+
+        function saveToStorage() {
+            localStorage.setItem('users', JSON.stringify(db.users));
+            localStorage.setItem('courses', JSON.stringify(db.courses));
+            localStorage.setItem('enrollments', JSON.stringify(db.enrollments));
+            localStorage.setItem('grades', JSON.stringify(db.grades));
+            localStorage.setItem('currentUser', JSON.stringify(db.currentUser));
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            updateUI();
+        }
+
+        function showResult(message, isError = false) {
+            const result = document.getElementById('result');
+            result.style.background = isError ? '#f8d7da' : '#d4edda';
+            result.style.color = isError ? '#721c24' : '#155724';
+            result.textContent = message;
+        }
+
+        // Регистрация
+        function register() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+
+            if (!username || !password) {
+                showResult('Заполните все поля', true);
+                return;
+            }
+
+            if (db.users.find(u => u.username === username)) {
+                showResult('Пользователь уже существует', true);
+                return;
+            }
+
+            const newUser = {
+                id: Date.now(),
+                username,
+                password: btoa(password), // Простое шифрование (не для продакшена!)
+                role,
+                fullName: username,
+                createdAt: new Date().toISOString()
+            };
+
+            db.users.push(newUser);
+            saveToStorage();
+            showResult('✅ Регистрация успешна! Теперь войдите.');
+        }
+
+        // Вход
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const user = db.users.find(u => u.username === username && u.password === btoa(password));
+            
+            if (user) {
+                db.currentUser = user;
+                saveToStorage();
+                updateUI();
+                showResult(`✅ Добро пожаловать, ${user.username}!`);
+            } else {
+                showResult('❌ Неверное имя или пароль', true);
+            }
+        }
+
+        // Выход
+        function logout() {
+            db.currentUser = null;
+            saveToStorage();
+            updateUI();
+            showResult('👋 Вы вышли из системы');
+        }
+
+        // Добавление курса
+        function showAddCourse() {
+            document.getElementById('add-course-form').style.display = 'block';
+        }
+
+        function cancelAddCourse() {
+            document.getElementById('add-course-form').style.display = 'none';
+        }
+
+        function addCourse() {
+            if (!db.currentUser || db.currentUser.role !== 'teacher') {
+                showResult('Только преподаватели могут создавать курсы', true);
+                return;
+            }
+
+            const course = {
+                id: Date.now(),
+                name: document.getElementById('course-name').value,
+                code: document.getElementById('course-code').value,
+                description: document.getElementById('course-desc').value,
+                teacherId: db.currentUser.id,
+                teacherName: db.currentUser.username,
+                createdAt: new Date().toISOString()
+            };
+
+            if (!course.name || !course.code) {
+                showResult('Заполните название и код курса', true);
+                return;
+            }
+
+            db.courses.push(course);
+            saveToStorage();
+            cancelAddCourse();
+            updateUI();
+            showResult('✅ Курс создан!');
+        }
+
+        // Запись на курс
+        function enrollCourse(courseId) {
+            if (!db.currentUser || db.currentUser.role !== 'student') {
+                showResult('Только студенты могут записываться на курсы', true);
+                return;
+            }
+
+            const existing = db.enrollments.find(e => e.courseId === courseId && e.studentId === db.currentUser.id);
+            if (!existing) {
+                db.enrollments.push({
+                    id: Date.now(),
+                    courseId,
+                    studentId: db.currentUser.id,
+                    enrolledAt: new Date().toISOString()
+                });
+                saveToStorage();
+                updateUI();
+                showResult('✅ Вы записаны на курс!');
+            }
+        }
+
+        // Выставление оценки
+        function addGrade(courseId, studentId, score) {
+            if (!db.currentUser || db.currentUser.role !== 'teacher') return;
+
+            db.grades.push({
+                id: Date.now(),
+                courseId,
+                studentId,
+                score,
+                teacherId: db.currentUser.id,
+                date: new Date().toISOString()
+            });
+            saveToStorage();
+            updateUI();
+        }
+
+        // Обновление интерфейса
+        function updateUI() {
+            // Информация о пользователе
+            const userDiv = document.getElementById('current-user');
+            if (db.currentUser) {
+                userDiv.innerHTML = `
+                    <div class="notification">
+                        👤 Текущий пользователь: ${db.currentUser.username} (${db.currentUser.role})
+                    </div>
+                `;
+            } else {
+                userDiv.innerHTML = '';
+            }
+
+            // Список курсов
+            const courseList = document.getElementById('course-list');
+            if (db.currentUser) {
+                let courses = db.courses;
+                if (db.currentUser.role === 'student') {
+                    const enrolledIds = db.enrollments
+                        .filter(e => e.studentId === db.currentUser.id)
+                        .map(e => e.courseId);
+                    courses = db.courses.filter(c => enrolledIds.includes(c.id));
+                } else if (db.currentUser.role === 'teacher') {
+                    courses = db.courses.filter(c => c.teacherId === db.currentUser.id);
+                }
+
+                courseList.innerHTML = courses.map(course => `
+                    <div class="course-card">
+                        <h4>${course.name} (${course.code})</h4>
+                        <p>${course.description || 'Нет описания'}</p>
+                        <p>Преподаватель: ${course.teacherName}</p>
+                        ${db.currentUser.role === 'student' ? 
+                            `<button onclick="enrollCourse(${course.id})">Записаться</button>` : 
+                            ''}
+                    </div>
+                `).join('') || 'Нет курсов';
+            }
+
+            // Оценки
+            const gradesList = document.getElementById('grades-list');
+            if (db.currentUser && db.currentUser.role === 'student') {
+                const studentGrades = db.grades.filter(g => g.studentId === db.currentUser.id);
+                gradesList.innerHTML = studentGrades.map(grade => {
+                    const course = db.courses.find(c => c.id === grade.courseId);
+                    return `
+                        <div class="course-card">
+                            <p>${course ? course.name : 'Курс'}: ${grade.score} баллов</p>
+                            <small>${new Date(grade.date).toLocaleDateString()}</small>
+                        </div>
+                    `;
+                }).join('') || 'Нет оценок';
+            } else if (db.currentUser && db.currentUser.role === 'teacher') {
+                // Для преподавателя показываем всех студентов
+                const teacherGrades = db.grades.filter(g => {
+                    const course = db.courses.find(c => c.id === g.courseId);
+                    return course && course.teacherId === db.currentUser.id;
+                });
+                gradesList.innerHTML = teacherGrades.map(grade => {
+                    const course = db.courses.find(c => c.id === grade.courseId);
+                    const student = db.users.find(u => u.id === grade.studentId);
+                    return `
+                        <div class="course-card">
+                            <p>${course ? course.name : 'Курс'} - ${student ? student.username : 'Студент'}: ${grade.score} баллов</p>
+                            <small>${new Date(grade.date).toLocaleDateString()}</small>
+                        </div>
+                    `;
+                }).join('') || 'Нет оценок';
+            }
+
+            // Профиль
+            const profileInfo = document.getElementById('profile-info');
+            if (db.currentUser) {
+                profileInfo.innerHTML = `
+                    <p><strong>Имя:</strong> ${db.currentUser.fullName}</p>
+                    <p><strong>Роль:</strong> ${db.currentUser.role}</p>
+                    <p><strong>Дата регистрации:</strong> ${new Date(db.currentUser.createdAt).toLocaleDateString()}</p>
+                `;
+            }
+        }
+
+        // Начальное обновление
+        updateUI();
+
+        // Добавим несколько тестовых курсов если их нет
+        if (db.courses.length === 0) {
+            db.courses.push({
+                id: 1,
+                name: 'Программирование на Python',
+                code: 'PY101',
+                description: 'Основы Python для начинающих',
+                teacherId: 0,
+                teacherName: 'admin',
+                createdAt: new Date().toISOString()
+            });
+            db.courses.push({
+                id: 2,
+                name: 'Веб-разработка',
+                code: 'WEB201',
+                description: 'HTML, CSS, JavaScript',
+                teacherId: 0,
+                teacherName: 'admin',
+                createdAt: new Date().toISOString()
+            });
+            saveToStorage();
+        }
+    </script>
+</body>
+</html>
