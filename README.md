@@ -42,60 +42,64 @@
 
 ```
 📦 Репозиторий учебной практики
-├── .gitignore                         # Это чтобы доп. программы не занимали много место в репозитории                       
-├── README.md                          # Этот файл (главная навигация)
-├── План (УП.01).md                    # План учебной практики
-├── Сравнение того что есть и нету.md  # Это таблица сравнивает что есть у 
+|
+├── .gitignore   # Игнорируемые файлы Git                       
+├── README.md   # Описание проекта
+├── План (УП.01).md   # План учебной практики
+├── Сравнение того что есть и нету.md   # Это таблица сравнивает что есть у 
 |                                         меня в документации и чего нет
 │
-├── docs/                # Основная документация проекта и не только
-│   ├── requirements/    # Документация по самому проекту
-│   │   ├── architectural-documentation.md    # Architectural Documentation
-│   │   ├── business-requirements.md          # Business Requirements Document
-│   │   ├── glossary.md                       # Glossary of Terms
-│   │   ├── nepali-stories.md                 # Test Plan
-│   │   ├── system-analysis.md                # System Analysis
-│   │   ├── technical-specification.md        # Technical Specification
-│   │   ├── testing-plan.md                   # Test Plan
-│   │   ├── use-case.md                       # use case
-│   │   └── user-guide.md                     # User Manual
+├── docs/   # Документация
+│   ├── requirements/   # Документация по самому проекту
+│   │   ├── architectural-documentation.md   # Архитектура системы
+│   │   ├── business-requirements.md   # Бизнес-требования
+│   │   ├── glossary.md   # Glossary of Terms
+│   │   ├── nepali-stories.md   # Пользовательские истории
+│   │   ├── system-analysis.md   # Системный анализ
+│   │   ├── technical-specification.md   # Техническое задание
+│   │   ├── testing-plan.md   # План тестирования
+│   │   ├── use-case.md   # варианты использования
+│   │   └── user-guide.md   # Руководство пользователя
 │   │
-│   └── uml/           # Докумнтация не по самому проекту
-│       ├── @Код_к_диаграмме_UML.md       # Расположен код и диаграмма UML
-│       ├── Конспект.md                   # Это, про UML
-│       └── Приемка.md                    # Это оценка моего приложения
+│   └── uml/   # Докумнтация не по самому проекту
+│       ├── @Код_к_диаграмме_UML.md   # Расположен код и диаграмма UML
+│       ├── Конспект.md   # Это, про UML
+│       └── Приемка.md   # Это оценка моего приложения
 │
-├── edugrader1/                                # Название проекта и что в нем находится
-│   ├── backend/                               # Основная директория бэкенда
-│   │   ├── app/                               # Модуль приложения (папка)
-│   │   ├── edugrader.db                        # Файл базы данных SQLite
-│   │   ├── main.py                             # Вход программы1
-│   │   ├── main_simple.py                      # Вход программы2 (Улучшенный)
-│   │   ├── models.py                           # Модели программы
-│   │   ├── requirements.txt                    # Зависимости (Библиотеки) python
-│   │   ├── schemas.py                          # Куда надо вводить
-│   │   └── edugrader.db                        # Дубликат файла БД 
-│   │
-│   ├── frontend/                              # Основная директория
-│   |    └── src/
-│   |    |   ├── App.js
-│   |    |   ├── api.js
-│   |    |   └── index.js
-|   |    |
-│   |    ├── edugrader-final.html
-│   |    ├── edugrader-glag.html
-│   |    ├── edugrader-manual.html
-│   |    ├── edugrader-roles.html
-│   |    ├── edugrader-standalone.html
-│   |    |── edugrader-test.html
-│   |    ├── index.html
-│   |    ├── package.json
-│   |    └── test-frontend.html
-|   |
-|   ├── edugrader-prilojenie.html  # Это гланый рабочий где все храниться код приложения, 
-|   |                                все остальное это предщественники
-|   |                               (Было жаль просто удалять я их еще сократил).
-|   └── test-simple.html                    
+└── edugrader1/   # Название проекта и что в нем находится
+    |
+    ├── backend/   # Серверная часть (FastAPI)
+    |   |
+    │   └── app/   # Основная папка приложения
+    │       ├── edugrader.db   # Файл базы данных SQLite
+    │       ├── main.py   # Основной файл сервера (полная версия)
+    │       ├── main_simple.py   # Главный файл сервера (упрощенная версия)
+    │       ├── models.py   # Модели базы данных
+    │       ├── requirements.txt   # Зависимости Python
+    │       ├── schemas.py   # Pydantic схемы для валидации
+    │       └── edugrader.db   # Дубликат файла БД 
+    │
+    ├── frontend/   # Клиентская часть (React)
+    |   |
+    |   ├── src/   # Исходный код и Публичные файлы React   
+    |   |   ├── App.js   # Главный компонент приложения
+    |   |   ├── api.js   # Настройки API для axios
+    |   |   └── index.js   # Точка входа
+    |   |
+    |   ├── edugrader-final.html
+    |   ├── edugrader-glag.html
+    |   ├── edugrader-manual.html
+    |   ├── edugrader-roles.html
+    |   ├── edugrader-standalone.html
+    |   |── edugrader-test.html   # Простая тестовая версия
+    |   |── index.html   # Основной HTML шаблон
+    |   ├── package.json
+    |   └── test-frontend.html
+    |
+    ├── edugrader-prilojenie.html  # Это гланый рабочий где все храниться код приложения, 
+    |                                все остальное это предщественники
+    |                               (Было жаль просто удалять я их еще сократил).
+    └── test-simple.html   # Упрощенный тестер                    
 ```
 
 ---
@@ -678,37 +682,37 @@ EduGrader - Система автоматизации оценивания уч�
 ## 📁 Структура исходного кода проекта
 
 ```
- ├── edugrader1/                                # Название проекта и что в нем находится
-│   ├── backend/                               # Основная директория бэкенда
-│   │   ├── app/                               # Модуль приложения (папка)
-│   │   ├── edugrader.db                        # Файл базы данных SQLite
-│   │   ├── main.py                             # Вход программы1
-│   │   ├── main_simple.py                      # Вход программы2 (Улучшенный)
-│   │   ├── models.py                           # Модели программы
-│   │   ├── requirements.txt                    # Зависимости (Библиотеки) python
-│   │   ├── schemas.py                          # Куда надо вводить
-│   │   └── edugrader.db                        # Дубликат файла БД 
-│   │
-│   ├── frontend/                              # НеОсновная директория
-│   |    └── src/
-│   |    |   ├── App.js
-│   |    |   ├── api.js
-│   |    |   └── index.js
-|   |    |
-│   |    ├── edugrader-final.html
-│   |    ├── edugrader-glag.html
-│   |    ├── edugrader-manual.html
-│   |    ├── edugrader-roles.html
-│   |    ├── edugrader-standalone.html
-│   |    |── edugrader-test.html
-│   |    ├── index.html
-│   |    ├── package.json
-│   |    └── test-frontend.html
-|   |
-|   ├── edugrader-prilojenie.html  # Это гланый рабочий где все храниться код приложения, 
-|   |                                все остальное это предщественники
-|   |                                (Было жаль просто удалять я их еще сократил).
-|   └── test-simple.html       
+└── edugrader1/   # Название проекта и что в нем находится
+    ├── backend/   # Серверная часть (FastAPI)
+    │   └── app/   # Основная папка приложения
+    │       ├── edugrader.db   # Файл базы данных SQLite
+    │       ├── main.py   # Основной файл сервера (полная версия)
+    │       ├── main_simple.py   # Главный файл сервера (упрощенная версия)
+    │       ├── models.py   # Модели базы данных
+    │       ├── requirements.txt   # Зависимости Python
+    │       ├── schemas.py   # Pydantic схемы для валидации
+    │       └── edugrader.db   # Дубликат файла БД 
+    │
+    ├── frontend/   # Клиентская часть (React)
+    |    ├── src/   # Исходный код и Публичные файлы React
+    |    |   ├── App.js   # Главный компонент приложения
+    |    |   ├── api.js   # Настройки API для axios
+    |    |   └── index.js   # Точка входа
+    |    |
+    |    ├── edugrader-final.html
+    |    ├── edugrader-glag.html
+    |    ├── edugrader-manual.html
+    |    ├── edugrader-roles.html
+    |    ├── edugrader-standalone.html
+    |    |── edugrader-test.html   # Простая тестовая версия
+    |    ├── index.html   # Основной HTML шаблон
+    |    ├── package.json
+    |    └── test-frontend.html
+    |
+    ├── edugrader-prilojenie.html  # Это гланый рабочий где все храниться код приложения, 
+    |                                все остальное это предщественники
+    |                                (Было жаль просто удалять я их еще сократил).
+    └── test-simple.html   # Упрощенный тестер         
 ```
 
 ---
