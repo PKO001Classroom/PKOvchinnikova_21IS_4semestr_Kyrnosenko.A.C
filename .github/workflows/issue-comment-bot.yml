@@ -23,8 +23,53 @@ jobs:
         with:
           github-token: ${{ secrets.ORG_BOT_PAT }}
           script: |
-            const owner = process.env.MASTER_OWNER || 'PKO001Classroom';
-            const repo = process.env.MASTER_REPO || 'EDUAI2026AgentMaster001';
+            const parseTarget = (masterOwnerEnv, masterRepoEnv) => {
+              const defaultOwner = 'PKO001Classroom';
+              const defaultRepo = 'EDUAI2026AgentMaster001';
+              const rawOwner = (masterOwnerEnv || '').trim();
+              const rawRepo = (masterRepoEnv || '').trim();
+
+              if (/^https?:\/\//i.test(rawRepo)) {
+                try {
+                  const parsed = new URL(rawRepo);
+                  const parts = parsed.pathname.split('/').filter(Boolean);
+                  if (parts.length >= 2) {
+                    return {
+                      owner: parts[0].trim() || defaultOwner,
+                      repo: parts[1].trim() || defaultRepo,
+                    };
+                  }
+                } catch (error) {
+                }
+              }
+
+              if (rawRepo.includes('/')) {
+                const parts = rawRepo.split('/').map((item) => item.trim()).filter(Boolean);
+                if (parts.length >= 2) {
+                  return {
+                    owner: parts[0] || defaultOwner,
+                    repo: parts[1] || defaultRepo,
+                  };
+                }
+              }
+
+              return {
+                owner: rawOwner || defaultOwner,
+                repo: rawRepo || defaultRepo,
+              };
+            };
+
+            const { owner, repo } = parseTarget(process.env.MASTER_OWNER, process.env.MASTER_REPO);
+
+            try {
+              await github.request('GET /repos/{owner}/{repo}', { owner, repo });
+            } catch (error) {
+              const status = error?.status || 'unknown';
+              throw new Error(
+                `Dispatch target ${owner}/${repo} is not accessible (status: ${status}). ` +
+                'Check MASTER_OWNER/MASTER_REPO values and ensure ORG_BOT_PAT has access to the master repo.'
+              );
+            }
 
             const payload = {
               _dispatch_event: 'issue_comment_event',
@@ -66,8 +111,53 @@ jobs:
         with:
           github-token: ${{ secrets.ORG_BOT_PAT }}
           script: |
-            const owner = process.env.MASTER_OWNER || 'PKO001Classroom';
-            const repo = process.env.MASTER_REPO || 'EDUAI2026AgentMaster001';
+            const parseTarget = (masterOwnerEnv, masterRepoEnv) => {
+              const defaultOwner = 'PKO001Classroom';
+              const defaultRepo = 'EDUAI2026AgentMaster001';
+              const rawOwner = (masterOwnerEnv || '').trim();
+              const rawRepo = (masterRepoEnv || '').trim();
+
+              if (/^https?:\/\//i.test(rawRepo)) {
+                try {
+                  const parsed = new URL(rawRepo);
+                  const parts = parsed.pathname.split('/').filter(Boolean);
+                  if (parts.length >= 2) {
+                    return {
+                      owner: parts[0].trim() || defaultOwner,
+                      repo: parts[1].trim() || defaultRepo,
+                    };
+                  }
+                } catch (error) {
+                }
+              }
+
+              if (rawRepo.includes('/')) {
+                const parts = rawRepo.split('/').map((item) => item.trim()).filter(Boolean);
+                if (parts.length >= 2) {
+                  return {
+                    owner: parts[0] || defaultOwner,
+                    repo: parts[1] || defaultRepo,
+                  };
+                }
+              }
+
+              return {
+                owner: rawOwner || defaultOwner,
+                repo: rawRepo || defaultRepo,
+              };
+            };
+
+            const { owner, repo } = parseTarget(process.env.MASTER_OWNER, process.env.MASTER_REPO);
+
+            try {
+              await github.request('GET /repos/{owner}/{repo}', { owner, repo });
+            } catch (error) {
+              const status = error?.status || 'unknown';
+              throw new Error(
+                `Dispatch target ${owner}/${repo} is not accessible (status: ${status}). ` +
+                'Check MASTER_OWNER/MASTER_REPO values and ensure ORG_BOT_PAT has access to the master repo.'
+              );
+            }
 
             const payload = {
               _dispatch_event: 'repo_push_event',
