@@ -20,9 +20,27 @@ jobs:
         env:
           MASTER_OWNER: ${{ vars.MASTER_OWNER }}
           MASTER_REPO: ${{ vars.MASTER_REPO }}
+          IGNORE_COMMENT_AUTHORS: ${{ vars.IGNORE_COMMENT_AUTHORS || 'RooterAI' }}
         with:
           github-token: ${{ secrets.ORG_BOT_PAT }}
           script: |
+            const ignoredAuthors = new Set(
+              String(process.env.IGNORE_COMMENT_AUTHORS || '')
+                .split(',')
+                .map((item) => item.trim().replace(/^@/, '').toLowerCase())
+                .filter(Boolean)
+            );
+
+            const commentAuthor = String(context.payload.comment?.user?.login || '')
+              .trim()
+              .replace(/^@/, '')
+              .toLowerCase();
+
+            if (commentAuthor && ignoredAuthors.has(commentAuthor)) {
+              core.info(`Skipping dispatch for ignored author: ${commentAuthor}`);
+              return;
+            }
+
             const parseTarget = (masterOwnerEnv, masterRepoEnv) => {
               const defaultOwner = 'PKO001Classroom';
               const defaultRepo = 'EDUAI2026AgentMaster001';
