@@ -35,8 +35,9 @@ jobs:
               .trim()
               .replace(/^@/, '')
               .toLowerCase();
+            const isRooterAI = commentAuthor === 'rooterai';
 
-            if (commentAuthor && ignoredAuthors.has(commentAuthor)) {
+            if (commentAuthor && ignoredAuthors.has(commentAuthor) && !isRooterAI) {
               core.info(`Skipping dispatch for ignored author: ${commentAuthor}`);
               return;
             }
