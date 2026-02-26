@@ -76,9 +76,7 @@ def get_all_movies(sort_by='watch_date'):
 
     try:
         query = f"""
-        SELECT id, title, watch_date, duration_min, rating, genre, review
-        FROM movie_logs 
-        ORDER BY {sort_by} DESC;
+        SELECT id, title, watch_date, duration_min, rating, genre, review FROM movie_logs ORDER BY {sort_by} DESC;
         """
 
         cursor.execute(query)
@@ -124,9 +122,7 @@ def filter_by_rating(min_rating):
 
     try:
         query = """
-            SELECT * FROM movie_logs 
-            WHERE rating >= %s 
-            ORDER BY rating DESC;
+            SELECT * FROM movie_logs WHERE rating >= %s ORDER BY rating DESC;
             """
         cursor.execute(query, (min_rating,))
         movies = cursor.fetchall()
@@ -148,9 +144,7 @@ def update_movie(log_id, new_rating, new_review):
 
     try:
         query = """
-            UPDATE movie_logs 
-            SET rating = %s, review = %s 
-            WHERE id = %s;
+            UPDATE movie_logs SET rating = %s, review = %s WHERE id = %s;
             """
         cursor.execute(query, (new_rating, new_review, log_id))
 
@@ -220,8 +214,7 @@ def get_cinema_stats():
             stats['total_hours'] = round(total_minutes / 60, 2) if total_minutes else 0
 
             cursor.execute("""
-                SELECT genre, COUNT(*) FROM movie_logs
-                GROUP BY genre ORDER BY COUNT(*) DESC LIMIT 1;
+                SELECT genre, COUNT(*) FROM movie_logs GROUP BY genre ORDER BY COUNT(*) DESC LIMIT 1;
             """)
             popular = cursor.fetchone()
             stats['popular_genre'] = popular[0] if popular else 'Нет данных'
@@ -248,13 +241,7 @@ def get_genres_ratings():
 
     try:
         query = """
-            SELECT genre, 
-                   COUNT(*) as movie_count,
-                   AVG(rating) as avg_rating
-            FROM movie_logs
-            WHERE rating IS NOT NULL
-            GROUP BY genre
-            ORDER BY avg_rating DESC;
+            SELECT genre COUNT(*) as movie_count AVG(rating) as avg_rating FROM movie_logs WHERE rating IS NOT NULL GROUP BY genre ORDER BY avg_rating DESC;
         """
         cursor.execute(query)
         genres = cursor.fetchall()
@@ -386,4 +373,5 @@ def main():
 
 
 if __name__ == '__main__':
+
     main()
